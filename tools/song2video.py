@@ -351,6 +351,28 @@ def cmd_fix(a):
 
 
 # ---------------------------------------------------------------- render
+def loudnorm(mp4, target):
+    """Bring the mix to the platform's loudness so it is not quiet next to everything else.
+    YouTube normalises to about -14 LUFS, Instagram to about -16; delivering louder than that
+    only gets turned down, and quieter just sounds weak. Two passes: the first measures the
+    track, the second corrects it — one pass alone lands a dB or so off."""
+    f = f"loudnorm=I={target}:TP=-1.5:LRA=11"
+    probe = subprocess.run(["ffmpeg", "-nostats", "-i", str(mp4), "-af", f + ":print_format=json",
+                            "-f", "null", "-"], capture_output=True, text=True).stderr
+    try:
+        m = json.loads(probe[probe.rindex("{"):probe.rindex("}") + 1])
+        f += (f":measured_I={m['input_i']}:measured_TP={m['input_tp']}"
+              f":measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}"
+              f":offset={m['target_offset']}:linear=true")
+    except (ValueError, KeyError):
+        pass                                   # no measurement: the single pass still helps
+    tmp = mp4.with_name(mp4.stem + ".loud.mp4")
+    sh(["ffmpeg", "-v", "error", "-y", "-i", str(mp4), "-c:v", "copy",
+        "-af", f, "-c:a", "aac", "-b:a", "192k", str(tmp)])
+    tmp.replace(mp4)
+    print(f"  loudness: {target} LUFS")
+
+
 def cmd_render(a):
     props_path = OUT / f"{a.slug}.props.json"
     if not props_path.exists():
@@ -375,6 +397,8 @@ def cmd_render(a):
         print(f"  rendering {cid} -> {dst.name}")
         sh(["npx", "remotion", "render", "src/index.ts", cid, str(dst),
             "--codec=h264", "--crf=18", f"--props={props_path}", *extra])
+        if not a.no_loudnorm:
+            loudnorm(dst, -16.0 if "short" in dst.stem else -14.0)
 
     if a.preview:
         for _, dst, _ in jobs:
@@ -414,6 +438,8 @@ def main():
     p = sub.add_parser("render"); p.set_defaults(fn=cmd_render)
     p.add_argument("slug"); p.add_argument("--short", action="store_true")
     p.add_argument("--preview", action="store_true")
+    p.add_argument("--no-loudnorm", action="store_true",
+                   help="skip the loudness pass (default: -14 LUFS, -16 for the Short)")
 
     a = ap.parse_args()
     a.fn(a)
