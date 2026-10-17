@@ -1,0 +1,14 @@
+# The app and the pipeline. Install into .venv with ./setup.sh
+streamlit>=1.40
+requests>=2.31
+numpy>=1.26
+scipy>=1.11
+pillow>=10.0
+
+# timing: vocals out of the mix, then transcribed for their boundaries
+demucs>=4.0
+stable-ts>=2.17
+
+# depth maps for the 2.5D parallax camera
+torch>=2.2
+transformers>=4.44

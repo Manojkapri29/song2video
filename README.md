@@ -11,14 +11,20 @@ seconds, each still filmed with a 2.5D parallax camera (depth map + a real persp
 your own photos and clips mixed in wherever you want them, and kinetic lyric or script type
 over the top.
 
-## Run it
+## Set it up on a new machine
 
 ```bash
-npm install
-streamlit run tools/app.py
+git clone https://github.com/Manojkapri29/song2video.git
+cd song2video
+./setup.sh          # node deps, a python venv, and a report of what is missing
+./run.command       # or: .venv/bin/streamlit run tools/app.py
 ```
 
-Four tabs, in order:
+It runs on your own machine, not in the cloud: the scenes come from a local FLUX, the timing
+from demucs and whisper, and the video from a headless Chrome render. There is no hosted
+version, and a serverless host (Vercel, Netlify and the like) cannot run any of it.
+
+Five tabs:
 
 1. **Audio + script** — upload the song or your voiceover, paste the lyrics or the script,
    one line per sung or spoken line. Press Prepare: it isolates the vocals, transcribes them
@@ -30,7 +36,10 @@ Four tabs, in order:
    photos or clips. "Look" picks photoreal, cinematic film, or illustrated. Build generates
    what is missing, writes a depth map per still, and spreads the cuts across the song,
    snapped to nearby line starts.
-4. **Render** — the video, the Short, and small preview copies.
+4. **Render** — the video, the Short, and small preview copies, loudness-normalised to
+   -14 LUFS (-16 for the Short).
+5. **Merge clips** — no song at all: several of your own clips and photos cut into one video,
+   in file-name order, with their own sound or under a music bed.
 
 ## From the command line
 
@@ -38,6 +47,7 @@ Four tabs, in order:
 python3 tools/song2video.py prepare song.mp4 --title "..." --lyrics lyrics.txt
 python3 tools/song2video.py fix <slug>
 python3 tools/song2video.py scenetrack <slug> --prompts scenes.txt --media mydir --set v2
+python3 tools/song2video.py cut  <slug> --media clips/ [--music bed.mp3] [--max 6]
 python3 tools/song2video.py render <slug> --short --preview
 python3 tools/depthmap.py public/img/<slug>_v2      # depth maps on their own
 python tools/check_presets.py                       # one still per composition, blank check
