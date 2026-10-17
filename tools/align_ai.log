@@ -1,0 +1,11 @@
+/Users/manojkapri/Claude/lyric-video/tools/.venv/lib/python3.11/site-packages/stable_whisper/whisper_word_level/original_whisper.py:249: UserWarning: FP16 is not supported on CPU; using FP32 instead
+  warnings.warn("FP16 is not supported on CPU; using FP32 instead")
+Transcribe:   0%|          | 0/60.0 [00:00<?, ?sec/s]Transcribe:  50%|█████     | 30.0/60.0 [00:15<00:15,  1.96sec/s]Transcribe: 100%|██████████| 60.0/60.0 [00:25<00:00,  2.44sec/s]Transcribe: 100%|██████████| 60.0/60.0 [00:25<00:00,  2.35sec/s]
+similarity heard-vs-lyrics: 0.03
+Align:   0%|          | 0/60.0 [00:00<?, ?sec/s]Align:  40%|████      | 24.18/60.0 [00:02<00:04,  8.58sec/s]Align:  85%|████████▌ | 51.14/60.0 [00:05<00:00,  9.12sec/s]Align: 100%|█████████▉| 59.98/60.0 [00:14<00:00,  3.25sec/s]Align: 100%|██████████| 60.0/60.0 [00:17<00:00,  3.40sec/s] 
+/Users/manojkapri/Claude/lyric-video/tools/.venv/lib/python3.11/site-packages/stable_whisper/alignment.py:211: UserWarning: Failed to align the last 44/55 words after 00:59.960.
+  result = aligner.align(audio, text)
+Adjustment:   0%|          | 0/60.0 [00:00<?, ?sec/s]Adjustment: 100%|██████████| 60.0/60.0 [00:00<00:00, 344265.72sec/s]
+/Users/manojkapri/Claude/lyric-video/tools/.venv/lib/python3.11/site-packages/stable_whisper/alignment.py:211: UserWarning: 8/10 segments failed to align.
+  result = aligner.align(audio, text)
+lines: 10 [(np.float64(51.14), np.float64(55.28)), (np.float64(57.72), 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0), (60.0, 60.0)]

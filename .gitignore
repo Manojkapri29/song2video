@@ -1,0 +1,15 @@
+node_modules/
+out/
+ref/
+ref3/
+.song2video/
+tools/.venv/
+tools/__pycache__/
+.DS_Store
+
+# media: songs, generated scenes and stingers stay on the machine, not in the repo
+public/img/
+public/*.mp3
+public/*.mp4
+public/*.wav
+tools/tmp/
