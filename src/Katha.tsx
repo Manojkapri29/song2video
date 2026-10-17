@@ -142,14 +142,18 @@ const Interlude: React.FC<{idx: number; dur: number; title: string; tag: string;
   const breathe = 1 + Math.sin(frame / 24) * 0.04;
   const fade = useInOut(dur, 14);
   return (
-    <Stage theme={t} backdrop={backdropOf(img, Boolean(tracked))} idx={idx} dur={dur} embers rays>
+    <Stage theme={t} backdrop={backdropOf(img, Boolean(tracked))} idx={idx} dur={dur}
+      embers rays={!tracked}>
       <Chrome tn={tn} tag={tag} title={title} mark={mark} />
-      <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', opacity: fade}}>
-        <div style={{fontSize: width / 7, transform: `scale(${breathe})`,
-          filter: `drop-shadow(0 0 ${width / 40}px ${t.accent})`}}>{mark}</div>
-        <div style={{marginTop: width / 60, fontFamily: FONTS.sans, fontSize: width / 26,
-          letterSpacing: 10, color: t.accent2, opacity: 0.9}}>{title}</div>
-      </AbsoluteFill>
+      {/* with a scene track the pictures carry the gap; the mark card would interrupt it */}
+      {tracked ? null : (
+        <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', opacity: fade}}>
+          <div style={{fontSize: width / 7, transform: `scale(${breathe})`,
+            filter: `drop-shadow(0 0 ${width / 40}px ${t.accent})`}}>{mark}</div>
+          <div style={{marginTop: width / 60, fontFamily: FONTS.sans, fontSize: width / 26,
+            letterSpacing: 10, color: t.accent2, opacity: 0.9}}>{title}</div>
+        </AbsoluteFill>
+      )}
     </Stage>
   );
 };
