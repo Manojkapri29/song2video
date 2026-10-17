@@ -439,11 +439,12 @@ def cmd_render(a):
         chk = OUT / f"{a.slug}.chk.png"
         mid = int(min(dur * 0.4, dur - 1) * FPS)
         sh(["npx", "remotion", "still", "src/index.ts", cid, str(chk),
-            f"--frame={mid}", f"--props={props_path}"], quiet=True)
+            f"--frame={mid}", f"--props={props_path}", "--timeout=180000"], quiet=True)
         print(f"  still ok: {chk.name} (frame {mid}) — look at it if anything seems off")
         print(f"  rendering {cid} -> {dst.name}")
+        # the Devanagari webfonts are fetched at render time and 30 s is not always enough
         sh(["npx", "remotion", "render", "src/index.ts", cid, str(dst),
-            "--codec=h264", "--crf=18", f"--props={props_path}", *extra])
+            "--codec=h264", "--crf=18", "--timeout=180000", f"--props={props_path}", *extra])
         if not a.no_loudnorm:
             loudnorm(dst, -16.0 if "short" in dst.stem else -14.0)
 

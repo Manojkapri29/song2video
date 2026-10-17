@@ -89,18 +89,18 @@ export const camera = (p: number, idx: number, sec: number) => {
   const dir = idx % 2 ? -1 : 1;
   const ease = p * p * (3 - 2 * p);
   const swing = idx % 4 < 2 ? 'x' : 'y';
-  const amp = Math.min(0.34, 0.03 * sec);
+  const amp = Math.min(0.4, 0.038 * sec);
   const t = (ease - 0.5) * dir * amp;
   return {
     cx: swing === 'x' ? t : t * 0.3,
     cy: swing === 'y' ? t * 0.6 : t * 0.2,
-    dist: interpolate(ease, [0, 1], [2.75, 2.75 - Math.min(0.33, 0.03 * sec)]),
+    dist: interpolate(ease, [0, 1], [2.75, 2.75 - Math.min(0.4, 0.038 * sec)]),
   };
 };
 
 export const Parallax: React.FC<{
   src: string; depth: string; idx: number; dur: number; strength?: number; filter?: string;
-}> = ({src, depth, idx, dur, strength = 0.42, filter = 'saturate(.85) contrast(1.05) brightness(.62)'}) => {
+}> = ({src, depth, idx, dur, strength = 0.55, filter = 'saturate(.85) contrast(1.05) brightness(.62)'}) => {
   const frame = useCurrentFrame();
   const {width, height, fps} = useVideoConfig();
   const ref = useRef<HTMLCanvasElement>(null);
