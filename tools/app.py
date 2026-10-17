@@ -140,7 +140,8 @@ slug = None if choice.startswith("➕") else choice
 if slug:
     st.sidebar.caption(f"out/{slug}.props.json")
 
-tabs = st.tabs(["1 · Audio + script", "2 · Timing review", "3 · Scenes", "4 · Render"])
+tabs = st.tabs(["1 · Audio + script", "2 · Timing review", "3 · Scenes", "4 · Render",
+                "Merge clips"])
 
 # ---- 1. song ----------------------------------------------------------------
 with tabs[0]:
@@ -271,3 +272,38 @@ with tabs[3]:
                 st.video(str(mp4))
             st.download_button("Download", mp4.read_bytes(), file_name=mp4.name,
                                mime="video/mp4", key=mp4.name)
+
+# ---- merge clips ------------------------------------------------------------
+with tabs[4]:
+    st.caption("Chhoti videos aur photos ek proper video me jod do — koi lyrics nahi. "
+               "File ke naam ka order hi cut order hai. Clips apni awaaz ke saath chalte hain, "
+               "music bed dene par clips mute ho jaate hain aur music chalta hai.")
+    name = st.text_input("Project ka naam (slug)", "cut1")
+    clips = st.file_uploader("Clips aur photos", accept_multiple_files=True,
+                             type=["mp4", "mov", "m4v", "webm", "png", "jpg", "jpeg", "webp"],
+                             key="cutmedia")
+    music = st.file_uploader("Music bed (optional)", type=["mp3", "wav", "m4a"], key="cutmusic")
+    c1, c2, c3 = st.columns(3)
+    mx = c1.number_input("Har clip max (sec, 0 = poora)", 0.0, 60.0, 0.0, step=0.5)
+    still = c2.number_input("Har photo (sec)", 1.0, 15.0, 4.0, step=0.5)
+    th = c3.selectbox("Theme", THEMES, key="cuttheme")
+    title = st.text_input("On-screen title", "", key="cuttitle")
+
+    if st.button("Cut them together", type="primary", disabled=not (clips and name.strip())):
+        slug2 = "".join(ch for ch in name.strip() if ch.isalnum() or ch in "-_") or "cut1"
+        d = OUT / "uploads" / f"{slug2}_cut"
+        d.mkdir(parents=True, exist_ok=True)
+        for u in clips:
+            (d / u.name).write_bytes(u.getbuffer())
+        args = ["cut", slug2, "--media", str(d), "--still", str(still), "--theme", th]
+        if mx:
+            args += ["--max", str(mx)]
+        if title.strip():
+            args += ["--title", title.strip()]
+        if music:
+            mp = d.parent / music.name
+            mp.write_bytes(music.getbuffer())
+            args += ["--music", str(mp)]
+        start_job("cut", args)
+        st.rerun()
+    st.caption("Ban jaane par sidebar se wo project chuno aur Render tab se render kar lo.")

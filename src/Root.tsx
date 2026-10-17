@@ -14,6 +14,10 @@ import explainer from '../public/explainer.json';
 import songProps from '../public/song.props.json';
 
 const FPS = 30;
+/** A song takes its length from its audio; a clip edit carries its own `duration`. */
+const songFrames = async (props: KathaProps) =>
+  Math.ceil((props.duration
+    ?? await getAudioDurationInSeconds(staticFile(props.audio ?? 'song.mp3'))) * FPS);
 const calc = async () => ({
   durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('song.mp3'))) * FPS),
 });
@@ -115,15 +119,9 @@ export const Root = () => (
       render with --props=out/<slug>.props.json to do any song without touching code. */}
   <Composition id="Song" component={Katha} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 60}
     defaultProps={{...songProps, lines: katha} as KathaProps}
-    calculateMetadata={async ({props}) => ({
-      durationInFrames: Math.ceil(
-        (await getAudioDurationInSeconds(staticFile((props as KathaProps).audio ?? 'song.mp3'))) * FPS),
-    })} />
+    calculateMetadata={async ({props}) => ({durationInFrames: await songFrames(props as KathaProps)})} />
   <Composition id="SongShort" component={Katha} width={1080} height={1920} fps={FPS} durationInFrames={FPS * 60}
     defaultProps={{...songProps, lines: katha} as KathaProps}
-    calculateMetadata={async ({props}) => ({
-      durationInFrames: Math.ceil(
-        (await getAudioDurationInSeconds(staticFile((props as KathaProps).audio ?? 'song.mp3'))) * FPS),
-    })} />
+    calculateMetadata={async ({props}) => ({durationInFrames: await songFrames(props as KathaProps)})} />
   </>
 );

@@ -18,8 +18,9 @@ export type Backdrop =
   | {kind: 'image'; src: string}
   /** still + depth map, filmed with a real camera move (see Parallax) */
   | {kind: 'parallax'; src: string; depth: string}
-  /** the user's own clip, graded like a still; loopSec (its length) repeats it to fill the shot */
-  | {kind: 'video'; src: string; loopSec?: number}
+  /** the user's own clip, graded like a still; loopSec (its length) repeats it to fill the
+   *  shot, sound plays it with its own audio (an edit of his footage, not a backdrop) */
+  | {kind: 'video'; src: string; loopSec?: number; sound?: boolean; from?: number}
   /** nothing: the caller paints its own backdrop behind this Stage */
   | {kind: 'none'}
   | {kind: 'stone'}
@@ -125,13 +126,18 @@ const StoneWall: React.FC<{theme: Theme; idx: number; dur: number}> = ({theme, i
 };
 
 /** A clip filling the shot: repeated from the top when it is shorter than the slot. */
-const Clip: React.FC<{src: string; loopSec?: number; filter: string}> = ({src, loopSec, filter}) => {
+const Clip: React.FC<{src: string; loopSec?: number; sound?: boolean; from?: number; filter: string}> =
+({src, loopSec, sound, from, filter}) => {
   const {fps} = useVideoConfig();
   const video = (
-    <OffthreadVideo src={staticFile(src)} muted
+    <OffthreadVideo src={staticFile(src)} muted={!sound}
+      startFrom={from ? Math.round(from * fps) : undefined}
       style={{width: '100%', height: '100%', objectFit: 'cover', filter}} />
   );
-  return loopSec ? <Loop durationInFrames={Math.max(1, Math.round(loopSec * fps))}>{video}</Loop> : video;
+  // looping a clip that carries its own sound would stutter the audio, so only silent ones repeat
+  return loopSec && !sound
+    ? <Loop durationInFrames={Math.max(1, Math.round(loopSec * fps))}>{video}</Loop>
+    : video;
 };
 
 export const Stage: React.FC<{
@@ -151,7 +157,8 @@ export const Stage: React.FC<{
       {backdrop.kind === 'video' && (
         <>
           <AbsoluteFill style={useKenBurns(dur, 1.04, 1.1, idx % 2 ? -2 : 2)}>
-            <Clip src={backdrop.src} loopSec={backdrop.loopSec} filter={gradeOf(theme)} />
+            <Clip src={backdrop.src} loopSec={backdrop.loopSec} sound={backdrop.sound}
+              from={backdrop.from} filter={gradeOf(theme)} />
           </AbsoluteFill>
           <AbsoluteFill style={{background: scrimOf(theme)}} />
         </>

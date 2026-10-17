@@ -4,6 +4,7 @@
   python tools/song2video.py prepare song.mp4 --title "..." [--lyrics lyrics.txt]
   python tools/song2video.py scenes  <slug> --prompts scenes.txt    [--size 1024x576]
   python tools/song2video.py scenetrack <slug> --prompts scenes.txt --set v2 [--media dir]
+  python tools/song2video.py cut    <slug> --media clips/ [--music bed.mp3] [--max 6]
   python tools/song2video.py render  <slug> [--short] [--preview]
 
 prepare  extracts the audio, isolates the vocals, finds what is ACTUALLY sung and where the
@@ -247,6 +248,7 @@ def clip_seconds(path):
 def adopt(src, imgdir, n):
     """Put one of the user's own files into imgdir as NN.ext; stills are converted to .png
     so the depth map and the Remotion side find them by one rule."""
+    imgdir.mkdir(parents=True, exist_ok=True)
     ext = src.suffix.lower() if src.suffix.lower() in CLIP_EXT else ".png"
     dst = imgdir / f"{n:02d}{ext}"
     if not dst.exists():
@@ -350,6 +352,51 @@ def cmd_fix(a):
     print(f"{len(kept)} lines kept, {dropped} dropped -> out/{a.slug}.props.json")
 
 
+# ---------------------------------------------------------------- cut
+def cmd_cut(a):
+    """Several clips (and stills) into one video, in file-name order.
+
+    No lyrics: the scene track is the whole film. Clips keep their own sound unless a music
+    bed is given, stills get --still seconds each with the parallax camera on them.
+    """
+    media = Path(a.media).expanduser()
+    imgdir = PUB / "img" / f"{a.slug}_cut"
+    keep = CLIP_EXT | {".png", ".jpg", ".jpeg", ".webp"}
+    files = sorted(f for f in media.iterdir()
+                   if f.suffix.lower() in keep and not f.name.endswith(".depth.png"))
+    if not files:
+        sys.exit(f"no clips or images in {media}")
+
+    scenes, t = [], 0.0
+    for i, f in enumerate(files, 1):
+        name = adopt(f, imgdir, i)
+        cut = {"start": round(t, 2), "img": f"{imgdir.relative_to(PUB).as_posix()}/{name}"}
+        if Path(name).suffix.lower() in CLIP_EXT:
+            length = clip_seconds(imgdir / name) or a.still
+            cut["clip"] = length
+            t += min(length, a.max) if a.max else length
+        else:
+            t += a.still
+        scenes.append(cut)
+        print(f"  {i:02d} {f.name}  -> {cut['start']}s")
+
+    py = AI / ".venv/bin/python"
+    py = str(py) if py.exists() else sys.executable
+    sh([py, str(ROOT / "tools/depthmap.py"), str(imgdir)], cwd=ROOT)
+
+    props = {"title": a.title or a.slug, "tag": a.tag, "hook": "",
+             "theme": a.theme, "mark": a.mark, "lines": [],
+             "duration": round(t, 2), "scenes": scenes, "clipAudio": not a.music}
+    if a.music:
+        src = Path(a.music).expanduser()
+        shutil.copy2(src, PUB / src.name)
+        props["audio"] = src.name
+    (OUT / f"{a.slug}.props.json").write_text(json.dumps(props, ensure_ascii=False, indent=1),
+                                              encoding="utf-8")
+    print(f"{len(scenes)} shots, {t:.1f}s -> out/{a.slug}.props.json\n"
+          f"next: python3 tools/song2video.py render {a.slug} --short --preview")
+
+
 # ---------------------------------------------------------------- render
 def loudnorm(mp4, target):
     """Bring the mix to the platform's loudness so it is not quiet next to everything else.
@@ -434,6 +481,14 @@ def main():
     p.add_argument("--size", default="1024x576")
     p.add_argument("--every", type=float, help="seconds per cut (default: song length / prompts)")
     p.add_argument("--snap", type=float, default=1.2, help="snap a cut to a line start within this many seconds")
+
+    p = sub.add_parser("cut"); p.set_defaults(fn=cmd_cut)
+    p.add_argument("slug"); p.add_argument("--media", required=True)
+    p.add_argument("--music", help="music bed; without it the clips keep their own sound")
+    p.add_argument("--max", type=float, default=0, help="trim every clip to at most this many seconds")
+    p.add_argument("--still", type=float, default=4.0, help="seconds per still")
+    p.add_argument("--title"); p.add_argument("--tag", default="कथा और रहस्य")
+    p.add_argument("--theme", default="katha"); p.add_argument("--mark", default="🔱")
 
     p = sub.add_parser("render"); p.set_defaults(fn=cmd_render)
     p.add_argument("slug"); p.add_argument("--short", action="store_true")

@@ -8,18 +8,22 @@ export type Word = {w: string; start: number; end: number};
 export type Line = {start: number; end: number; text: string; words?: Word[]; img?: string};
 /** A picture cut, independent of the lyric lines: the scene changes every few seconds.
  *  `img` may be a still (parallax, needs a depth map) or one of the user's own clips. */
-export type SceneCut = {start: number; img: string; clip?: number};
+export type SceneCut = {start: number; img: string; clip?: number; from?: number};
 export type KathaProps = {
   lines: Line[]; title: string; tag: string;
   audio?: string; hook?: string; theme?: string; mark?: string;
   /** when present, the pictures come from this track and the lyric slots stay transparent */
   scenes?: SceneCut[];
+  /** play each clip with its own sound — an edit of his footage, not a backdrop under a song */
+  clipAudio?: boolean;
+  /** length when there is no audio track to take it from (a pure clip edit) */
+  duration?: number;
 };
 
 const depthOf = (img: string) => img.replace(/\.png$/i, '.depth.png');
 const isClip = (src: string) => /\.(mp4|mov|webm|m4v)$/i.test(src);
-const shotBackdrop = (cut: SceneCut): Backdrop => isClip(cut.img)
-  ? {kind: 'video', src: cut.img, loopSec: cut.clip}
+const shotBackdrop = (cut: SceneCut, sound?: boolean): Backdrop => isClip(cut.img)
+  ? {kind: 'video', src: cut.img, loopSec: cut.clip, sound, from: cut.from}
   : {kind: 'parallax', src: cut.img, depth: depthOf(cut.img)};
 const backdropOf = (img: string | undefined, tracked: boolean): Backdrop =>
   tracked ? {kind: 'none'} : img ? {kind: 'image', src: img} : {kind: 'stone'};
@@ -28,7 +32,8 @@ const backdropOf = (img: string | undefined, tracked: boolean): Backdrop =>
  * Picture track: a new illustrated scene every few seconds, each a 2.5D parallax move,
  * cut on its own clock so the visuals never sit still for a long verse.
  */
-const SceneTrack: React.FC<{scenes: SceneCut[]; total: number; tn?: string}> = ({scenes, total, tn}) => {
+const SceneTrack: React.FC<{scenes: SceneCut[]; total: number; tn?: string; sound?: boolean}> =
+({scenes, total, tn, sound}) => {
   const {fps} = useVideoConfig();
   const t = themeOf(tn);
   const FADE = Math.round(fps * 0.5);
@@ -41,7 +46,7 @@ const SceneTrack: React.FC<{scenes: SceneCut[]; total: number; tn?: string}> = (
         if (dur <= 0) return null;
         return (
           <Sequence key={i} from={from} durationInFrames={dur}>
-            <Shot cut={cut} idx={i} dur={dur} fade={i ? FADE : 0} tn={tn} />
+            <Shot cut={cut} idx={i} dur={dur} fade={i ? FADE : 0} tn={tn} sound={sound} />
           </Sequence>
         );
       })}
@@ -50,13 +55,13 @@ const SceneTrack: React.FC<{scenes: SceneCut[]; total: number; tn?: string}> = (
 };
 
 /** One parallax shot, fading in over the one before it. */
-const Shot: React.FC<{cut: SceneCut; idx: number; dur: number; fade: number; tn?: string}> =
-({cut, idx, dur, fade, tn}) => {
+const Shot: React.FC<{cut: SceneCut; idx: number; dur: number; fade: number; tn?: string;
+  sound?: boolean}> = ({cut, idx, dur, fade, tn, sound}) => {
   const frame = useCurrentFrame();
   const opacity = fade ? interpolate(frame, [0, fade], [0, 1], {extrapolateRight: 'clamp'}) : 1;
   return (
     <AbsoluteFill style={{opacity}}>
-      <Stage theme={themeOf(tn)} backdrop={shotBackdrop(cut)} idx={idx} dur={dur} />
+      <Stage theme={themeOf(tn)} backdrop={shotBackdrop(cut, sound)} idx={idx} dur={dur} />
     </AbsoluteFill>
   );
 };
@@ -143,15 +148,17 @@ const Interlude: React.FC<{idx: number; dur: number; title: string; tag: string;
 };
 
 export const Katha: React.FC<KathaProps> = ({
-  lines, title, tag, audio = 'song.mp3', hook = 'कथा और रहस्य', theme, mark = '🔱', scenes,
+  lines, title, tag, audio, hook = 'कथा और रहस्य', theme, mark = '🔱', scenes, clipAudio,
 }) => {
   const {fps, durationInFrames} = useVideoConfig();
   const f = (sec: number) => Math.round(sec * fps);
 
   type Slot = {from: number; to: number; line?: Line; img?: string};
   const slots: Slot[] = [];
-  let cursor = 0;
-  lines.forEach((l, li) => {
+  // a pure clip edit has no lyrics: the scene track is the whole film, no interlude card over it
+  const edit = !lines.length && Boolean(scenes?.length);
+  let cursor = edit ? durationInFrames : 0;
+  (edit ? [] : lines).forEach((l, li) => {
     const from = f(l.start);
     if (from - cursor > fps * 0.4) {
       slots.push({from: cursor, to: from, img: l.img ?? lines[li - 1]?.img});   // instrumental
@@ -165,8 +172,10 @@ export const Katha: React.FC<KathaProps> = ({
 
   return (
     <AbsoluteFill style={{background: themeOf(theme).bg}}>
-      <Audio src={staticFile(audio)} />
-      {scenes?.length ? <SceneTrack scenes={scenes} total={durationInFrames} tn={theme} /> : null}
+      {audio ? <Audio src={staticFile(audio)} /> : null}
+      {scenes?.length
+        ? <SceneTrack scenes={scenes} total={durationInFrames} tn={theme} sound={clipAudio} />
+        : null}
       {slots.map((s, i) => (
         <Sequence key={i} from={s.from} durationInFrames={s.to - s.from}>
           {s.line ? (
