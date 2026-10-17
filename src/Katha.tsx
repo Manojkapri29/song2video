@@ -76,16 +76,23 @@ const wordsOf = (l: Line): Word[] => {
 const Chrome: React.FC<{tn?: string; tag: string; title: string; mark: string}> = ({tn, tag, title, mark}) => {
   const t = themeOf(tn);
   const {width, height} = useVideoConfig();
+  // Vertical: the platform's own UI covers the top ~12% and bottom ~18%, so the channel marks
+  // move inside that. Landscape keeps the original edges.
+  const portrait = height > width;
+  const top = height * (portrait ? 0.145 : 0.055);
+  const rule = height * (portrait ? 0.19 : 0.1);
+  const foot = height * (portrait ? 0.2 : 0.022);
+  const size = width / (portrait ? 30 : 50);
   return (
     <>
-      <div style={{position: 'absolute', left: 0, right: 0, top: height * 0.1, height: 2,
+      <div style={{position: 'absolute', left: 0, right: 0, top: rule, height: 2,
         background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)`, opacity: 0.55}} />
-      <div style={{position: 'absolute', left: width * 0.045, top: height * 0.055, fontFamily: FONTS.sans,
-        fontSize: width / 50, letterSpacing: 5, color: t.accent2, opacity: 0.85}}>{tag}</div>
-      <div style={{position: 'absolute', right: width * 0.045, top: height * 0.055,
-        fontSize: width / 50, opacity: 0.85}}>{mark}</div>
-      <div style={{position: 'absolute', left: 0, right: 0, bottom: height * 0.022, textAlign: 'center',
-        fontFamily: FONTS.sans, fontSize: width / 58, letterSpacing: 6,
+      <div style={{position: 'absolute', left: width * 0.045, top, fontFamily: FONTS.sans,
+        fontSize: size, letterSpacing: 5, color: t.accent2, opacity: 0.85}}>{tag}</div>
+      <div style={{position: 'absolute', right: width * 0.045, top,
+        fontSize: size, opacity: 0.85}}>{mark}</div>
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: foot, textAlign: 'center',
+        fontFamily: FONTS.sans, fontSize: width / (portrait ? 34 : 58), letterSpacing: 6,
         color: t.accent2, opacity: 0.6}}>{title}</div>
     </>
   );
