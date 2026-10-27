@@ -14,3 +14,6 @@ public/*.mp4
 public/*.wav
 tools/tmp/
 tools/*.log
+
+# audiomap.py ka output — har gaane ka apna, commit karne layak nahi
+public/audiomap.json

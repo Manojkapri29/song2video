@@ -7,11 +7,13 @@ import {Katha, KathaProps} from './Katha';
 import {Brand, BrandProps} from './presets/Brand';
 import {Explainer, ExplainerProps, explainerDuration, Card} from './presets/Explainer';
 import {SocialPost, SocialProps} from './presets/SocialPost';
+import {AudioViz, AudioVizProps} from './AudioViz';
 import lyrics from '../public/lyrics.json';
 import bhajan from '../public/bhajan.json';
 import katha from '../public/katha_final.json';
 import explainer from '../public/explainer.json';
 import songProps from '../public/song.props.json';
+import audiovizProps from '../public/audioviz.props.json';
 
 const FPS = 30;
 /** A song takes its length from its audio; a clip edit carries its own `duration`. */
@@ -123,5 +125,17 @@ export const Root = () => (
   <Composition id="SongShort" component={Katha} width={1080} height={1920} fps={FPS} durationInFrames={FPS * 60}
     defaultProps={{...songProps, lines: katha} as KathaProps}
     calculateMetadata={async ({props}) => ({durationInFrames: await songFrames(props as KathaProps)})} />
+  {/* One-click: tools/autoviz.py analyses the audio and renders this. Its length comes
+      from the audio map, not from a prop anyone has to keep in sync. */}
+  <Composition id="AudioViz" component={AudioViz} width={1920} height={1080} fps={FPS}
+    durationInFrames={FPS * 60} defaultProps={audiovizProps as unknown as AudioVizProps}
+    calculateMetadata={({props}) => ({
+      durationInFrames: Math.ceil(((props as AudioVizProps).map?.duration ?? 60) * FPS),
+    })} />
+  <Composition id="AudioVizShort" component={AudioViz} width={1080} height={1920} fps={FPS}
+    durationInFrames={FPS * 60} defaultProps={audiovizProps as unknown as AudioVizProps}
+    calculateMetadata={({props}) => ({
+      durationInFrames: Math.ceil(((props as AudioVizProps).map?.duration ?? 60) * FPS),
+    })} />
   </>
 );

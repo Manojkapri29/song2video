@@ -35,15 +35,18 @@ st.set_page_config(page_title="Song → Video", page_icon="🎬", layout="wide")
 
 
 # ------------------------------------------------------------------ background jobs
-def start_job(name: str, args: list[str]):
-    """Run one song2video step detached, logging to out/<name>.log. One job at a time."""
+def start_job(name: str, args: list[str], script: Path = None):
+    """Run one pipeline step detached, logging to out/<name>.log. One job at a time.
+
+    `script` defaults to song2video.py; the one-click path passes autoviz.py.
+    """
     if job_running():
         st.warning("A job is already running.")
         return
     log = OUT / f"{name}.log"
     OUT.mkdir(exist_ok=True)
     with log.open("w") as fh:
-        p = subprocess.Popen([sys.executable, str(S2V), *args], cwd=ROOT,
+        p = subprocess.Popen([sys.executable, str(script or S2V), *args], cwd=ROOT,
                              stdout=fh, stderr=subprocess.STDOUT, start_new_session=True)
     JOB.write_text(json.dumps({"name": name, "pid": p.pid, "log": log.name,
                                "started": time.time(), "args": args}))
@@ -140,11 +143,53 @@ slug = None if choice.startswith("➕") else choice
 if slug:
     st.sidebar.caption(f"out/{slug}.props.json")
 
-tabs = st.tabs(["1 · Audio + script", "2 · Timing review", "3 · Scenes", "4 · Render",
-                "Merge clips"])
+tabs = st.tabs(["⚡ 1-click", "1 · Audio + script", "2 · Timing review", "3 · Scenes",
+                "4 · Render", "Merge clips"])
+
+# ---- 0. one click -----------------------------------------------------------
+with tabs[0]:
+    st.subheader("Audio do, video lo")
+    st.caption("Motion audio se banti hai — beat, energy aur teen frequency bands. "
+               "Koi transcription nahi, isliye beech me kuch check karne ko nahi hai. "
+               "Screen par lyrics chahiye to woh dusra tab hai, aur wahan timing dekhni padti hai.")
+    up1 = st.file_uploader("mp3 / wav / m4a / mp4 / mov", type=["mp3", "wav", "m4a", "mp4", "mov"],
+                           key="oneclick_file")
+    c1, c2 = st.columns(2)
+    t1 = c1.text_input("Title (screen par bada)", key="oneclick_title")
+    th1 = c2.selectbox("Theme", THEMES, index=THEMES.index("katha"), key="oneclick_theme")
+    c3, c4 = st.columns(2)
+    tag1 = c3.text_input("Channel tag", "कथा और रहस्य", key="oneclick_tag")
+    short1 = c4.checkbox("Shorts / Reels (1080x1920)", key="oneclick_short")
+    st.caption("1080p ka ek minute is Mac par ~4 minute leta hai. Pehle **Still** dekh lo — "
+               "woh sekandon me aata hai aur look wahi hota hai.")
+    b1, b2 = st.columns(2)
+    if b1.button("Still dekho", disabled=not up1, key="oneclick_still") and up1:
+        d = OUT / "uploads"; d.mkdir(parents=True, exist_ok=True)
+        f = d / up1.name; f.write_bytes(up1.getbuffer())
+        args = [str(f), "--theme", th1, "--tag", tag1, "--still"]
+        if t1: args += ["--title", t1]
+        if short1: args += ["--short"]
+        start_job("autoviz-still", args, script=ROOT / "tools" / "autoviz.py")
+        st.rerun()
+    if b2.button("Video banao", type="primary", disabled=not up1, key="oneclick_render") and up1:
+        d = OUT / "uploads"; d.mkdir(parents=True, exist_ok=True)
+        f = d / up1.name; f.write_bytes(up1.getbuffer())
+        args = [str(f), "--theme", th1, "--tag", tag1]
+        if t1: args += ["--title", t1]
+        if short1: args += ["--short"]
+        start_job("autoviz", args, script=ROOT / "tools" / "autoviz.py")
+        st.rerun()
+
+    made = sorted(OUT.glob("*.mp4"), key=lambda f: f.stat().st_mtime, reverse=True)
+    shots = sorted(OUT.glob("*.png"), key=lambda f: f.stat().st_mtime, reverse=True)
+    if shots:
+        st.image(str(shots[0]), caption=f"last still: {shots[0].name}")
+    if made:
+        st.video(str(made[0]))
+        st.caption(f"out/{made[0].name}")
 
 # ---- 1. song ----------------------------------------------------------------
-with tabs[0]:
+with tabs[1]:
     if slug:
         p = load_props(slug)
         st.write(f"**{p['title']}** — {len(p['lines'])} lines, "
@@ -179,7 +224,7 @@ with tabs[0]:
             st.rerun()
 
 # ---- 2. review --------------------------------------------------------------
-with tabs[1]:
+with tabs[2]:
     if not slug:
         st.info("Pehle audio + script prepare karo.")
     else:
@@ -196,7 +241,7 @@ with tabs[1]:
                 st.success("Timing updated.")
 
 # ---- 3. scenes --------------------------------------------------------------
-with tabs[2]:
+with tabs[3]:
     if not slug:
         st.info("Pehle ek song ya explainer prepare karo.")
     else:
@@ -252,7 +297,7 @@ with tabs[2]:
             st.rerun()
 
 # ---- 4. render --------------------------------------------------------------
-with tabs[3]:
+with tabs[4]:
     if not slug:
         st.info("Pehle audio + script prepare karo.")
     else:
@@ -274,7 +319,7 @@ with tabs[3]:
                                mime="video/mp4", key=mp4.name)
 
 # ---- merge clips ------------------------------------------------------------
-with tabs[4]:
+with tabs[5]:
     st.caption("Chhoti videos aur photos ek proper video me jod do — koi lyrics nahi. "
                "File ke naam ka order hi cut order hai. Clips apni awaaz ke saath chalte hain, "
                "music bed dene par clips mute ho jaate hain aur music chalta hai.")
