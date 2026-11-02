@@ -156,7 +156,7 @@ const MomentCard: React.FC<{m: Moment; T: Theme; low?: boolean}> = ({m, T, low})
   const o = Math.min(inO, outO);
   return (
     <div style={{position: 'absolute', right: width * 0.045, width: width * 0.17,
-      ...(low ? {bottom: height * 0.06} : {top: height * 0.13}),
+      ...(low ? {bottom: height * 0.24} : {top: height * 0.13}),
       opacity: o, transform: `translateX(${(1 - inO) * 60}px)`, padding: width * 0.012,
       background: `${T.bg}d9`, border: `2px solid ${T.accent}`, borderRadius: 18,
       boxShadow: `0 0 40px ${T.accent}44`}}>

@@ -19,6 +19,7 @@ import kailashPro from '../public/kailash_pro.json';
 import {Anant} from './presets/Anant';
 import {Moment} from './kit/Moments';
 import anantMoments from '../public/anant_moments.json';
+import anantLines from '../public/anant_lines.json';
 import {Storybook, StorybookProps} from './presets/Storybook';
 import pahadiStory from '../public/pahadi.story.json';
 import {Garuda, GProps} from './Garuda';
@@ -139,7 +140,7 @@ export const Root = () => (
       durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
     })} />
   <Composition id="Anant" component={Anant} width={1280} height={720} fps={FPS} durationInFrames={15613}
-    defaultProps={{moments: anantMoments as Moment[]}} />
+    defaultProps={{moments: anantMoments as Moment[], lines: anantLines}} />
   <Composition id="Merged" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 861}
     defaultProps={{data: filmMerged as FilmData, audio: 'merged_vo.mp3'}}
     calculateMetadata={async () => ({
