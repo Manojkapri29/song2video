@@ -1,0 +1,126 @@
+# माउंट कैलाश — deck -> film plan.
+#
+# The source is a Gamma slide deck read aloud: 21 slides, 393 s, white template. The audio is
+# kept exactly as it is; everything above it is replaced. Each `@` block is one narration beat
+# with the slide's own in/out times, the headline that gets kinetic type, and one FLUX prompt
+# per shot inside that beat. deck2film.py spaces the shots evenly across the beat.
+#
+# Faces are kept away from camera: FLUX draws a different face every run and a changing face
+# across cuts reads as a mistake, so pilgrims are silhouettes, backs, or distant figures.
+#
+# audio: kailash.mp3
+# slug: kailash
+# title: माउंट कैलाश
+# tag: कथा और रहस्य
+# theme: katha
+# mark: 🔱
+
+@ 0.0 | 21.58 | माउंट कैलाश
+the black pyramid peak of Mount Kailash at first light, vast Tibetan plateau below, thin cloud tearing across the summit, cold blue hour, cinematic wide shot, volumetric haze, 35mm
+slow aerial over the empty Tibetan plateau, snow ridges running to the horizon, one tiny line of prayer flags in the foreground, overcast silver light
+the south face of Kailash with its vertical scar of snow, seen from across a frozen plain, enormous scale, lone dark boulder in the foreground for size
+a single pilgrim silhouette seen from behind, small against the mountain, walking a stone path, dust and wind, backlit
+
+@ 21.58 | 40.37 | चार धर्म, एक पर्वत
+rows of weathered prayer flags strung across a high pass, snow peak behind them, wind blowing hard, late afternoon gold
+an ancient stone cairn stacked by pilgrims on a ridge, mist moving through, mountain faint behind
+close on a worn mani stone carved with Tibetan script, frost in the grooves, shallow depth of field
+
+@ 40.37 | 48.25 | ब्रह्मांड के वास्तविक केंद्र में क्या छिपा है?
+the mountain almost swallowed by storm cloud, only the dark summit showing, ominous, deep blue and charcoal
+a narrow slot of light breaking through heavy cloud onto the peak, god rays, rest of the frame in shadow
+
+@ 48.25 | 72.79 | ब्रह्मांड का केंद्र
+cosmic diagram feel: the mountain rising from a dark plain while faint concentric rings of starlight turn around its summit, painterly, deep indigo
+Mount Meru as sacred axis, a dark peak with a shaft of light running from its tip into a star field, mythic illustration, gold and midnight blue
+a very old painted thangka texture of a sacred mountain, cracked pigment, gold leaf catching light, macro
+the peak at night under a turning star trail, long exposure feel, snow glowing faintly
+
+@ 72.79 | 94.66 | एक पर्वत, चार नाम
+four pilgrims in different robes walking the same stone circuit, all seen from behind at distance, dust rising, warm low sun
+a Buddhist pilgrim prostrating full length on the circuit path, seen from behind, worn knee pads, long shadow
+a Jain stone shrine on a windswept ridge, carved pillars, snow peak far behind, cold light
+a Bon practitioner walking counter-clockwise, dark robe, prayer wheel turning, motion blur on the wheel
+
+@ 94.66 | 101.87 | दृश्य और अदृश्य दुनिया यहीं मिलती है
+the summit half real rock and half dissolving into light and cloud, surreal, cinematic, the boundary between worlds
+a mirror-still lake at the mountain's foot holding a perfect inverted reflection of the peak, dusk, utterly silent
+
+@ 101.87 | 119.37 | खोया हुआ क्रिस्टल महल
+a vast palace of clear crystal half buried in ice, faceted walls catching blue light, mythic, concept art
+light refracting through a huge crystal column, rainbow fracture lines, dark cavern around it
+the ghost outline of a palace appearing inside the mountain's ice face, barely there, eerie
+
+@ 119.37 | 141.29 | भक्ति और कर्म
+heavy iron chains and a corroded lock on an ancient door set into rock, frost, torchlight
+a stone doorway in a cliff face, carved with worn figures, snow drifting across the threshold
+two carved stone guardians flanking a dark entrance, moss and ice, low angle, imposing
+
+@ 141.29 | 167.33 | क्रिस्टल महल की कथा
+an ancient king's silhouette standing before a crystal hall, seen from behind, robe and crown outlined in light
+twenty-four jewelled statues standing in a row inside a crystal chamber, gems catching torchlight, reverent wide shot
+close on a jewelled statue's hand, emeralds and rubies set into carved stone, candlelight, macro
+armoured iron sentinels standing motionless in a frozen corridor, rust and ice, shafts of pale light
+
+@ 167.33 | 175.62 | कोई खंडहर नहीं मिला
+a modern expedition team as tiny dots on a vast snowfield, nothing around them, grey flat light
+the bare rock face of the mountain filling the frame, no ruins, no structures, only stone and ice, stark
+
+@ 175.62 | 197.75 | पवित्र और भूतिया झीलें
+two lakes side by side seen from the air, one brilliant turquoise and one dark and dead, the mountain between them, striking contrast
+the turquoise lake at sunrise, utterly calm, pilgrims' small figures on the shore, warm light on water
+the dark lake under storm cloud, grey waves, bare shore, no life, bleak
+a thin isthmus of land dividing the two lakes, seen from a ridge, light on one side and shadow on the other
+
+@ 197.75 | 208.04 | मीठा पानी और खारा पानी
+close on clear fresh lake water lapping over smooth stones, sunlight through it, pure
+close on dark salt-crusted lake shore, white mineral rime on black stones, dead and still
+
+@ 208.04 | 234.29 | रावण के मिथक
+a ten-headed demon king's silhouette kneeling before a mountain, seen from behind, lightning behind the peak, mythic
+an enormous dark figure attempting to lift the mountain from below, stylised, storm and dust, epic scale
+a divine thumb pressing down on the mountain's base, light radiating from the point of contact, mythic illustration
+the demon king pinned beneath the mountain's weight, only his silhouette and the crushing rock, dramatic red light
+
+@ 234.29 | 250.62 | निस्वार्थ भक्ति और अहंकार
+a veena made of sinew and bone resting on stone, torchlit, beautiful and unsettling
+a devotee playing a stringed instrument before a mountain shrine at night, seen from behind, firelight, devotion
+a crowned shadow swelling up the mountain face as its owner shrinks, pride cast as a growing silhouette, stylised, storm light
+
+@ 250.62 | 260.04 | दस कटे हुए सिर
+ten severed crowned heads laid in a row as an offering before a stone lingam, torchlight, stylised and non-graphic, shadow heavy
+a stone lingam on an altar with offerings and smoke curling around it, deep shadow, single shaft of light
+
+@ 260.04 | 279.54 | आधुनिक रहस्य और विज्ञान
+a brass compass needle spinning wildly, held in a gloved hand, snow blowing, close up
+modern climbing equipment abandoned in snow, ropes and carabiners half buried, grey light
+a weather station instrument frozen solid on a ridge, rime ice thick on every surface
+
+@ 279.54 | 300.04 | क्या यहाँ समय तेज़ी से बीतता है?
+a clock face with hands blurred into a circle of motion, the mountain visible behind it, surreal double exposure
+a time-lapse sky racing over the still peak, streaked cloud, the mountain perfectly motionless
+an hourglass standing on snow with the peak behind, sand falling fast, cold blue light
+
+@ 300.04 | 344.12 | 6,666
+a spiral of concentric ridges around the mountain seen from directly above, geometric, almost architectural
+surveyors' lines and measurement arcs drawn in light across a dark mountain face, technical and mystical
+the mountain rendered as a precise four-sided pyramid of dark stone, each face catching different light, graphic
+a sacred geometry diagram of nested squares and circles glowing over a night sky, gold on midnight
+the peak seen from four directions in one impossible composite, cubist, mythic
+an ancient brass astrolabe open on a stone slab, engraved arcs, candlelight, macro
+distances drawn as thin glowing lines running from the peak across a dark globe, cartographic, deep blue
+
+@ 344.12 | 365.54 | वैज्ञानिक व्याख्या
+magnetised iron filings arranging themselves into curved field lines on dark paper, macro, blue light
+a battery and headlamp dead in the snow, frost on the contacts, cold grey light
+an exhausted climber's gloved hands on his knees, head down, seen from the side at distance, thin air and white sky
+a small aircraft turning away from an enormous mountain face, tiny against it, grey overcast
+
+@ 365.54 | 390.45 | आध्यात्मिक उत्थान का सर्वोच्च प्रतीक
+the peak at golden hour with warm light running down its snow, serene, majestic, wide
+a pilgrim's silhouette standing still before the mountain, arms at sides, dawn light, reverent
+the mountain reflected in still water with the first star above it, blue hour, peaceful
+prayer flags in silhouette against a huge orange sky, mountain dark beneath, final frame feel
+
+@ 390.45 | 393.55 | और क्या रहस्य छिपे हैं?
+the mountain fading into deep blue darkness, almost gone, one faint star, end card feel

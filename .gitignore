@@ -8,7 +8,8 @@ tools/__pycache__/
 .DS_Store
 
 # media: songs, generated scenes and stingers stay on the machine, not in the repo
-public/img/
+# every scene folder under public/ is generated media, not source
+public/*/
 public/*.mp3
 public/*.mp4
 public/*.wav
@@ -17,3 +18,7 @@ tools/*.log
 
 # audiomap.py ka output — har gaane ka apna, commit karne layak nahi
 public/audiomap.json
+.claude-flow/
+.swarm/
+work/
+*.vtt

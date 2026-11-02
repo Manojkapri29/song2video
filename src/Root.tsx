@@ -7,7 +7,22 @@ import {Katha, KathaProps} from './Katha';
 import {Brand, BrandProps} from './presets/Brand';
 import {Explainer, ExplainerProps, explainerDuration, Card} from './presets/Explainer';
 import {SocialPost, SocialProps} from './presets/SocialPost';
+import {Sketch, SketchProps} from './Sketch';
+import {Story, StoryProps, storyFrames} from './presets/Story';
 import {AudioViz, AudioVizProps} from './AudioViz';
+import {KailashFilm, FilmData} from './presets/KailashFilm';
+import kailashFilm from '../public/kailash_film.json';
+import film2027 from '../public/film2027.json';
+import filmMerged from '../public/film_merged.json';
+import kailashStory from '../public/kailash_story.json';
+import kailashPro from '../public/kailash_pro.json';
+import {Anant} from './presets/Anant';
+import {Moment} from './kit/Moments';
+import anantMoments from '../public/anant_moments.json';
+import {Storybook, StorybookProps} from './presets/Storybook';
+import pahadiStory from '../public/pahadi.story.json';
+import {Garuda, GProps} from './Garuda';
+import garudaProps from '../public/garuda/props.json';
 import lyrics from '../public/lyrics.json';
 import bhajan from '../public/bhajan.json';
 import katha from '../public/katha_final.json';
@@ -103,6 +118,38 @@ export const Root = () => (
   <Composition id="IntroShort" component={Brand} width={1080} height={1920} fps={FPS} durationInFrames={FPS * 6}
     defaultProps={{title: 'कथा और रहस्य', sub: 'KATHA AUR RAHASYA', mark: '🔱', theme: 'katha', variant: 'intro', audio: 'intro_sting.wav'} as BrandProps} />
 
+  <Composition id="KailashFilm" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 394}
+    defaultProps={{data: kailashFilm as FilmData, audio: 'kailash_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
+    })} />
+  <Composition id="KailashStory" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 394}
+    defaultProps={{data: kailashStory as FilmData, audio: 'kailash_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
+    })} />
+  <Composition id="KailashPro" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 394}
+    defaultProps={{data: kailashPro as FilmData, audio: 'kailash_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
+    })} />
+  <Composition id="KailashVox" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 394}
+    defaultProps={{data: {...(kailashPro as FilmData), theme: 'vox'}, audio: 'kailash_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
+    })} />
+  <Composition id="Anant" component={Anant} width={1280} height={720} fps={FPS} durationInFrames={15613}
+    defaultProps={{moments: anantMoments as Moment[]}} />
+  <Composition id="Merged" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 861}
+    defaultProps={{data: filmMerged as FilmData, audio: 'merged_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('merged_vo.mp3'))) * FPS),
+    })} />
+  <Composition id="Film2027" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 454}
+    defaultProps={{data: film2027 as FilmData, audio: 'film2027_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('film2027_vo.mp3'))) * FPS),
+    })} />
   <Composition id="Explainer" component={Explainer} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 19}
     defaultProps={explainer as ExplainerProps}
     calculateMetadata={async ({props}) => ({
@@ -122,6 +169,14 @@ export const Root = () => (
   <Composition id="Song" component={Katha} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 60}
     defaultProps={{...songProps, lines: katha} as KathaProps}
     calculateMetadata={async ({props}) => ({durationInFrames: await songFrames(props as KathaProps)})} />
+  {/* Pencil-sketch lyric video: drawings that sketch themselves, lyrics hand-lettered as sung. */}
+  <Composition id="Sketch" component={Sketch} width={1920} height={1080} fps={FPS}
+    durationInFrames={FPS * 60}
+    defaultProps={{lines: [], title: '', handle: '@kathaaurrahasya', audio: ''} as unknown as SketchProps}
+    calculateMetadata={async ({props}) => ({
+      durationInFrames: Math.ceil(((props as SketchProps).duration
+        ?? await getAudioDurationInSeconds(staticFile((props as SketchProps).audio))) * FPS),
+    })} />
   <Composition id="SongShort" component={Katha} width={1080} height={1920} fps={FPS} durationInFrames={FPS * 60}
     defaultProps={{...songProps, lines: katha} as KathaProps}
     calculateMetadata={async ({props}) => ({durationInFrames: await songFrames(props as KathaProps)})} />
@@ -132,6 +187,27 @@ export const Root = () => (
     calculateMetadata={({props}) => ({
       durationInFrames: Math.ceil(((props as AudioVizProps).map?.duration ?? 60) * FPS),
     })} />
+  {/* Vector storybook for a song: pages turn on beats from tools/audiomap.py. */}
+  <Composition id="Storybook" component={Storybook} width={1920} height={1080} fps={FPS}
+    durationInFrames={FPS * 180}
+    defaultProps={{...pahadiStory, handle: '@KathaAurRahasya'} as unknown as StorybookProps}
+    calculateMetadata={async ({props}) => ({
+      durationInFrames: Math.ceil(
+        (await getAudioDurationInSeconds(staticFile((props as StorybookProps).audio))) * FPS),
+    })} />
+  <Composition id="StorybookShort" component={Storybook} width={1080} height={1920} fps={FPS}
+    durationInFrames={FPS * 180}
+    defaultProps={{...pahadiStory, handle: '@KathaAurRahasya'} as unknown as StorybookProps}
+    calculateMetadata={async ({props}) => ({
+      durationInFrames: Math.ceil(
+        (await getAudioDurationInSeconds(staticFile((props as StorybookProps).audio))) * FPS),
+    })} />
+  <Composition id="GarudaShort" component={Garuda} width={1080} height={1920} fps={FPS}
+    durationInFrames={1210} defaultProps={garudaProps as unknown as GProps} />
+  {/* Text to narrated cinematic explainer: tools/story2video.py writes the props file. */}
+  <Composition id="Story" component={Story} width={1920} height={1080} fps={FPS} durationInFrames={FPS}
+    defaultProps={{scenes: []} as StoryProps}
+    calculateMetadata={({props}) => ({durationInFrames: storyFrames((props as StoryProps).scenes)})} />
   <Composition id="AudioVizShort" component={AudioViz} width={1080} height={1920} fps={FPS}
     durationInFrames={FPS * 60} defaultProps={audiovizProps as unknown as AudioVizProps}
     calculateMetadata={({props}) => ({

@@ -277,6 +277,12 @@ def build_scenes(entries, imgdir, size, media):
             print(f"  {i:02d} {src.name}", flush=True)
             continue
         dst = imgdir / f"{i:02d}.png"
+        # animate_scenes.py turns NN.png into NN.mp4; prefer the clip once it exists
+        clip = dst.with_suffix(".mp4")
+        if clip.exists():
+            names.append(clip.name)
+            print(f"  {i:02d} animated clip", flush=True)
+            continue
         names.append(dst.name)
         if dst.exists():
             print(f"  {i:02d} exists, skipping", flush=True)

@@ -1,0 +1,68 @@
+{
+ "audio": "pahadi.mp3",
+ "duration": 179.776,
+ "title": "त्वी मेरी पराण छे",
+ "sub": "पहाड़ी प्रेम गीत",
+ "pages": [
+  {
+   "scene": "dawn",
+   "start": 0.0,
+   "end": 14.65
+  },
+  {
+   "scene": "village",
+   "start": 14.65,
+   "end": 29.98
+  },
+  {
+   "scene": "terrace",
+   "start": 29.98,
+   "end": 44.98
+  },
+  {
+   "scene": "buransh",
+   "start": 44.98,
+   "end": 59.81
+  },
+  {
+   "scene": "flute",
+   "start": 59.81,
+   "end": 74.84
+  },
+  {
+   "scene": "glance",
+   "start": 74.84,
+   "end": 89.86
+  },
+  {
+   "scene": "pines",
+   "start": 89.86,
+   "end": 104.98
+  },
+  {
+   "scene": "lamps",
+   "start": 104.98,
+   "end": 119.98
+  },
+  {
+   "scene": "river",
+   "start": 119.98,
+   "end": 134.98
+  },
+  {
+   "scene": "monsoon",
+   "start": 134.98,
+   "end": 149.49
+  },
+  {
+   "scene": "stars",
+   "start": 149.49,
+   "end": 165.3
+  },
+  {
+   "scene": "sunrise",
+   "start": 165.3,
+   "end": 179.78
+  }
+ ]
+}

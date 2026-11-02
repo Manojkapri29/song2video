@@ -23,6 +23,12 @@ export const THEMES: Record<string, Theme> = {
   // warm light romance: soft cream, rose and gold, for love songs
   romance: {name: 'romance', bg: '#fbf1e6', ink: '#3a2219', dim: 'rgba(58,34,25,.34)',
     accent: '#d4567a', accent2: '#c98a2e', display: 'serif', light: true},
+  // cold teal HUD look with amber highlights, for prophecy / 'what if' explainers
+  prophecy: {name: 'prophecy', bg: '#03100f', ink: '#eafff9', dim: 'rgba(190,255,240,.36)',
+    accent: '#19e6c1', accent2: '#ffd166', display: 'display'},
+  // flat bright yellow with black ink and red highlight, for Vox-style explainers
+  vox: {name: 'vox', bg: '#f5c400', ink: '#111111', dim: 'rgba(17,17,17,.36)',
+    accent: '#e8412c', accent2: '#111111', display: 'sans', light: true},
   // high-contrast social post
   punch: {name: 'punch', bg: '#101014', ink: '#ffffff', dim: 'rgba(255,255,255,.3)',
     accent: '#f6f03c', accent2: '#ff3b6b', display: 'display'},

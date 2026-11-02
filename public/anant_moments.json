@@ -1,0 +1,110 @@
+[
+ {
+  "at": 21.39,
+  "dur": 4.2,
+  "kind": "clock",
+  "label": "समय"
+ },
+ {
+  "at": 29.87,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ },
+ {
+  "at": 57.91,
+  "dur": 4.2,
+  "kind": "clock",
+  "label": "समय"
+ },
+ {
+  "at": 64.05,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ },
+ {
+  "at": 80.09,
+  "dur": 4.2,
+  "kind": "wave",
+  "label": "योगवशिष्ठ"
+ },
+ {
+  "at": 89.91,
+  "dur": 4.2,
+  "kind": "eight",
+  "label": "काक भुशुण्डी"
+ },
+ {
+  "at": 99.63,
+  "dur": 4.2,
+  "kind": "ten",
+  "label": "इच्छा"
+ },
+ {
+  "at": 118.17,
+  "dur": 4.2,
+  "kind": "wave",
+  "label": "योगवशिष्ठ"
+ },
+ {
+  "at": 143.63,
+  "dur": 4.2,
+  "kind": "four",
+  "label": "राम"
+ },
+ {
+  "at": 154.67,
+  "dur": 4.2,
+  "kind": "orbit",
+  "label": "ब्रह्मांड"
+ },
+ {
+  "at": 227.37,
+  "dur": 4.2,
+  "kind": "eight",
+  "label": "काक भुशुण्डी"
+ },
+ {
+  "at": 239.19,
+  "dur": 4.2,
+  "kind": "mountain",
+  "label": "सुमेरू"
+ },
+ {
+  "at": 272.25,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ },
+ {
+  "at": 280.21,
+  "dur": 4.2,
+  "kind": "eight",
+  "label": "काक भुशुण्डी"
+ },
+ {
+  "at": 400.89,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ },
+ {
+  "at": 436.75,
+  "dur": 4.2,
+  "kind": "orbit",
+  "label": "ब्रह्मांड"
+ },
+ {
+  "at": 445.43,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ },
+ {
+  "at": 488.57,
+  "dur": 4.2,
+  "kind": "magnify",
+  "label": "सवाल"
+ }
+]
