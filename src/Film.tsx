@@ -54,7 +54,7 @@ const Plate: React.FC<{src: string; span: [number, number]; t: number; pulse: nu
     <AbsoluteFill style={{opacity: on}}>
       <img src={staticFile(src)} alt="" style={{width: '100%', height: '100%', objectFit: 'cover',
         transform: `scale(${1.08 + k * 0.14 + pulse * 0.01}) translate(${(k - 0.5) * 2.2}%, ${(0.5 - k) * 1.2}%)`,
-        filter: 'saturate(.86) contrast(1.12) brightness(.72)'}} />
+        filter: 'saturate(.88) contrast(1.1) brightness(.84)'}} />
     </AbsoluteFill>
   );
 };
@@ -130,14 +130,14 @@ export const Film: React.FC<SketchProps> = ({lines, title, handle, audio, durati
       })}
 
       {/* a single accent rule that answers the voice */}
-      <div style={{position: 'absolute', left: '50%', bottom: safe + height * 0.085,
+      <div style={{position: 'absolute', left: '50%', bottom: safe + height * 0.075,
         width: width * (0.06 + beat * 0.3), height: 3, marginLeft: -width * (0.03 + beat * 0.15),
         background: theme.accent, opacity: 0.25 + beat * 0.55, borderRadius: 2}} />
 
       <div style={{position: 'absolute', left: width * 0.045, top: safe + height * 0.045,
         fontFamily: 'Teko, sans-serif', fontSize: width / 54, letterSpacing: 5,
         color: theme.ink, opacity: 0.6, textTransform: 'uppercase'}}>{title}</div>
-      <div style={{position: 'absolute', right: width * 0.045, bottom: safe + height * 0.04,
+      <div style={{position: 'absolute', right: width * 0.045, bottom: safe + height * 0.014,
         fontFamily: 'Teko, sans-serif', fontSize: width / 64, letterSpacing: 4,
         color: theme.accent2, opacity: 0.55}}>{handle}</div>
 
@@ -162,7 +162,7 @@ const Line: React.FC<{words: {w: string; start: number; end: number}[]; t0: numb
   );
   return (
     <div style={{position: 'absolute', left: width * 0.12, right: width * 0.12,
-      bottom: bottom + width * 0.055, opacity: on,
+      bottom: bottom + width * 0.08, opacity: on,
       transform: `translateY(${(1 - on) * 18}px)`}}>
       <KineticLine words={words} t0={t0} theme={theme} size={width / 23} />
     </div>
