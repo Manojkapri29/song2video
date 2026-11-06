@@ -5,6 +5,8 @@ import {Cinema} from './kit/Cinema';
 import {KineticLine} from './kit/Type';
 import {themeOf} from './kit/theme';
 import {photosOf, tintsOf} from './drawings';
+import {Scene as SceneType} from './kit/Flat2D';
+import {scenesOf} from './scenes2d';
 import type {SketchLine, SketchProps} from './Sketch';
 
 const BAR = 0.075;        // letterbox height, as a share of the frame
@@ -59,8 +61,29 @@ const Plate: React.FC<{src: string; span: [number, number]; t: number; pulse: nu
   );
 };
 
+/** One 2D scene, crossfading with its neighbours exactly as a photograph would. */
+const Flat: React.FC<{scene?: SceneType; span: [number, number]; t: number; beat: number;
+  mood: number; tint: string; accent: string; w: number; h: number}> =
+({scene: S, span, t, beat, mood, tint, accent, w, h}) => {
+  const [a, b] = span;
+  const on = Math.min(
+    interpolate(t, [a, a + 1.2], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+    interpolate(t, [b - 1.2, b], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+  );
+  if (on <= 0 || !S) return null;
+  const k = interpolate(t, [a, b], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  return (
+    <AbsoluteFill style={{opacity: on}}>
+      <AbsoluteFill style={{transform: `scale(${1.04 + k * 0.06 + beat * 0.008})`}}>
+        <S t={t} k={k} beat={beat} mood={mood} tint={tint} accent={accent} w={w} h={h} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
 /** Cinematic cut of the same story: full-bleed photography, karaoke type, audio-driven light. */
-export const Film: React.FC<SketchProps> = ({lines, title, handle, audio, duration, set}) => {
+export const Film: React.FC<SketchProps & {art?: 'photo' | '2d'}> =
+({lines, title, handle, audio, duration, set, art = 'photo'}) => {
   const frame = useCurrentFrame();
   const {fps, width, height, durationInFrames} = useVideoConfig();
   const t = frame / fps;
@@ -69,6 +92,8 @@ export const Film: React.FC<SketchProps> = ({lines, title, handle, audio, durati
 
   const pics = photosOf(set);
   const tints = tintsOf(set);
+  const scenes = scenesOf(set);
+  const flat = art === '2d' && scenes.length > 0;
 
   // two envelopes off the same narration: one tracks syllables, one the mood of the passage
   const data = useAudioData(staticFile(audio));
@@ -76,7 +101,7 @@ export const Film: React.FC<SketchProps> = ({lines, title, handle, audio, durati
   const mood = data ? rms(data.channelWaveforms[0], data.sampleRate, t, 0.5, 6) : 0;
 
   // the lines of each block, in the order the drawings/photos are listed
-  const count = Math.max(pics.length, ...lines.map((l) => (l.block ?? 0) + 1));
+  const count = Math.max(pics.length, scenes.length, ...lines.map((l) => (l.block ?? 0) + 1));
   const blocks = Array.from({length: count}, (_, i) => lines.filter((l) => (l.block ?? 0) === i))
     .map((ls, i) => ({i, lines: ls}))
     .filter((b) => b.lines.length);
@@ -103,11 +128,13 @@ export const Film: React.FC<SketchProps> = ({lines, title, handle, audio, durati
       {audio ? <Audio src={staticFile(audio)} /> : null}
 
       <Cinema dur={durationInFrames}>
-        {blocks.map((b, j) => (
-          <Plate key={b.i} src={pics[b.i]} span={spans[j]} t={t} pulse={beat} />
-        ))}
+        {blocks.map((b, j) => flat
+          ? <Flat key={b.i} scene={scenes[b.i]} span={spans[j]} t={t} beat={beat} mood={mood}
+              tint={tints[b.i] ?? theme.accent} accent={theme.accent} w={width} h={height} />
+          : <Plate key={b.i} src={pics[b.i]} span={spans[j]} t={t} pulse={beat} />)}
+        {/* a photograph needs the colour laid on it; a drawn scene is already that colour */}
         {/* the passage's colour, laid over the photograph */}
-        <AbsoluteFill style={{background: tint, mixBlendMode: 'color', opacity: 0.42}} />
+        {flat ? null : <AbsoluteFill style={{background: tint, mixBlendMode: 'color', opacity: 0.42}} />}
         {/* and its light, breathing with the narration */}
         <AbsoluteFill style={{mixBlendMode: 'screen', opacity: glow,
           background: `radial-gradient(ellipse at 50% 62%, ${tint} 0%, rgba(0,0,0,0) 62%)`}} />
