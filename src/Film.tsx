@@ -8,10 +8,16 @@ import {photosOf, tintsOf} from './drawings';
 import {Scene as SceneType} from './kit/Flat2D';
 import {scenesOf} from './scenes2d';
 import {motifIn, Motif} from './motifs';
+import {Animate, AnimName, pickAnim} from './kit/Animate';
 import type {SketchLine, SketchProps} from './Sketch';
 
 const BAR = 0.075;        // letterbox height, as a share of the frame
 const HOLD = 1.4;         // seconds a finished line stays on screen
+
+/** The animate.css entries the lyric lines cycle through, in order. */
+const ENTRIES: AnimName[] = ['fadeInUp', 'blurIn', 'bounceIn', 'fadeInLeft', 'zoomInUp',
+  'flipInX', 'backInUp', 'fadeInRight', 'lightSpeedInRight', 'rotateIn', 'jackInTheBox',
+  'fadeInDown', 'zoomIn', 'flipInY', 'rollIn'];
 
 const hex = (c: string): [number, number, number] =>
   [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)) as [number, number, number];
@@ -170,7 +176,8 @@ export const Film: React.FC<SketchProps & {art?: 'photo' | '2d'}> =
         const len = Math.max(1, Math.round((until - l.start) * fps));
         return (
           <Sequence key={i} from={from} durationInFrames={len} layout="none">
-            <Line words={wordsOf(l)} t0={l.start} len={len} theme={theme} width={width} bottom={safe} />
+            <Line words={wordsOf(l)} t0={l.start} len={len} theme={theme} width={width} bottom={safe}
+              anim={pickAnim(ENTRIES, i)} />
           </Sequence>
         );
       })}
@@ -197,20 +204,14 @@ export const Film: React.FC<SketchProps & {art?: 'photo' | '2d'}> =
   );
 };
 
-/** A lyric line: karaoke highlight inside, the block itself easing in and out. */
+/** A lyric line: karaoke highlight inside, the block arriving on an animate.css entry. */
 const Line: React.FC<{words: {w: string; start: number; end: number}[]; t0: number; len: number;
-  theme: ReturnType<typeof themeOf>; width: number; bottom: number}> =
-({words, t0, len, theme, width, bottom}) => {
-  const frame = useCurrentFrame();
-  const on = Math.min(
-    interpolate(frame, [0, 9], [0, 1], {extrapolateRight: 'clamp'}),
-    interpolate(frame, [len - 9, len], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
-  );
-  return (
-    <div style={{position: 'absolute', left: width * 0.12, right: width * 0.12,
-      bottom: bottom + width * 0.08, opacity: on,
-      transform: `translateY(${(1 - on) * 18}px)`}}>
+  theme: ReturnType<typeof themeOf>; width: number; bottom: number; anim: AnimName}> =
+({words, t0, len, theme, width, bottom, anim}) => (
+  <div style={{position: 'absolute', left: width * 0.12, right: width * 0.12,
+    bottom: bottom + width * 0.08}}>
+    <Animate name={anim} len={len} px={width * 0.05}>
       <KineticLine words={words} t0={t0} theme={theme} size={width / 23} />
-    </div>
-  );
-};
+    </Animate>
+  </div>
+);
