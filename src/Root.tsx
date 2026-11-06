@@ -173,7 +173,7 @@ export const Root = () => (
   {/* Pencil-sketch lyric video: drawings that sketch themselves, lyrics hand-lettered as sung. */}
   <Composition id="Sketch" component={Sketch} width={1920} height={1080} fps={FPS}
     durationInFrames={FPS * 60}
-    defaultProps={{lines: [], title: '', handle: '@kathaaurrahasya', audio: ''} as unknown as SketchProps}
+    defaultProps={{lines: [], title: '', handle: '@kathaaurrahasya', audio: '', set: 'pahadi'} as unknown as SketchProps}
     calculateMetadata={async ({props}) => ({
       durationInFrames: Math.ceil(((props as SketchProps).duration
         ?? await getAudioDurationInSeconds(staticFile((props as SketchProps).audio))) * FPS),

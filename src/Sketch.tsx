@@ -2,15 +2,18 @@ import React from 'react';
 import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont as loadKalam} from '@remotion/google-fonts/Kalam';
 import {Drawing, Paper, PencilDrawing} from './kit/Pencil';
-import {PAHADI_DRAWINGS} from './drawings/pahadi';
+import {setOf} from './drawings';
 
 const hand = loadKalam('normal', {weights: ['400', '700'], subsets: ['devanagari', 'latin']}).fontFamily;
 const INK = '#4a4038';
 
 export type Word = {w: string; start: number; end: number};
-export type SketchLine = {start: number; end: number; text: string; words?: Word[]};
+/** `block` pins a line to a drawing; without it the lines are split evenly. */
+export type SketchLine = {start: number; end: number; text: string; words?: Word[]; block?: number};
 export type SketchProps = {
   lines: SketchLine[]; title: string; handle: string; audio: string; duration?: number;
+  /** which drawing set to use — see src/drawings/index.ts */
+  set?: string;
 };
 
 const BLOCK_H = 820;          // one drawing + its lines
@@ -68,15 +71,18 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
   );
 };
 
-export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, duration}) => {
+export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, duration, set}) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames, height} = useVideoConfig();
   const t = frame / fps;
   const total = duration ?? durationInFrames / fps;
 
-  const per = Math.ceil(lines.length / PAHADI_DRAWINGS.length);
-  const blocks = PAHADI_DRAWINGS.map((strokes, i) => ({
-    strokes, lines: lines.slice(i * per, (i + 1) * per),
+  const art = setOf(set);
+  const pinned = lines.some((l) => l.block !== undefined);
+  const per = Math.ceil(lines.length / art.length);
+  const blocks = art.map((strokes, i) => ({
+    strokes,
+    lines: pinned ? lines.filter((l) => l.block === i) : lines.slice(i * per, (i + 1) * per),
   })).filter((b) => b.lines.length);
 
   // which block the song is on, eased so the page glides rather than jumps
