@@ -28,12 +28,13 @@ const rnd = (n: number) => {
   return x - Math.floor(x);
 };
 
-/** where shot `n` sits: how close in, and how far off centre */
-const shotOf = (n: number) => ({
-  z: 1.1 + rnd(n) * 0.26,
-  x: (rnd(n + 97) - 0.5) * 0.3,
-  y: (rnd(n + 211) - 0.5) * 0.18,
-});
+/** where shot `n` sits: how close in, and how far off centre.
+ *  the offset can only use the margin the zoom created, or the picture would crop to blank */
+const shotOf = (n: number) => {
+  const z = 1.12 + rnd(n) * 0.3;
+  const room = (z - 1) * 0.9;
+  return {z, x: (rnd(n + 97) - 0.5) * room, y: (rnd(n + 211) - 0.5) * room};
+};
 
 const wordsOf = (l: SketchLine): Word[] => {
   if (l.words?.length) return l.words;
@@ -59,8 +60,8 @@ const Handwritten: React.FC<{line: SketchLine; t: number; size: number}> = ({lin
 );
 
 /** A page block: the drawing on the left, the verse written beside it. */
-const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: number}> =
-({strokes, lines, t, faded}) => {
+const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: number;
+  cam: {z: number; x: number; y: number}}> = ({strokes, lines, t, faded, cam}) => {
   const first = lines[0]?.start ?? 0;
   const last = lines[lines.length - 1]?.end ?? first + 1;
   // the picture is drawn across the first half of the verse, so the hand is always ahead of the words
@@ -71,9 +72,12 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
   return (
     <div style={{height: BLOCK_H, display: 'flex', alignItems: 'center', gap: 60,
       padding: '0 120px', opacity: faded}}>
-      <div style={{width: 760, height: 610, flexShrink: 0, padding: 18,
+      <div style={{width: 760, height: 610, flexShrink: 0, padding: 18, overflow: 'hidden',
         boxShadow: '0 2px 26px rgba(80,62,38,.18)', background: 'rgba(255,252,243,.3)'}}>
-        <PencilDrawing strokes={strokes} p={p} faded={faded} />
+        <div style={{width: '100%', height: '100%',
+          transform: `translate(${cam.x * 100}%, ${cam.y * 100}%) scale(${cam.z})`}}>
+          <PencilDrawing strokes={strokes} p={p} faded={faded} />
+        </div>
       </div>
       <div style={{flex: 1, minWidth: 0, paddingTop: 40, minHeight: 240}}>
         {lines.map((l, i) => {
@@ -139,27 +143,22 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const ease = into * into * (3 - 2 * into);
   const a = shotOf(n - 1);
   const b = shotOf(n);
-  // while a line is being written the camera stays nearly still, so the words never leave frame;
-  // in the long gaps between lines it is free to move
-  const speaking = lines.some((l) => t >= l.start - 0.4 && t < l.end + 1.2);
-  const live = speaking ? 0 : 1 - pull;
-  const cam = {
+  const live = 1 - pull;                            // the pull-back shows the page flat again
+  const cam: {z: number; x: number; y: number} = {
     z: 1 + (a.z + (b.z - a.z) * ease - 1) * live,
     x: (a.x + (b.x - a.x) * ease) * live,
     y: (a.y + (b.y - a.y) * ease) * live,
   };
-  const breathe = 1 + amp * (speaking ? 0.018 : 0.045);
+  cam.z *= 1 + amp * 0.05 * live;                   // the picture leans in on the loud words
 
   return (
     <AbsoluteFill>
       {audio ? <Audio src={staticFile(audio)} /> : null}
       <Paper>
-        <AbsoluteFill style={{transform:
-          `translate(${cam.x * 100}%, ${cam.y * 100}%) scale(${scale * cam.z * breathe})`,
-          transformOrigin: 'center center'}}>
+        <AbsoluteFill style={{transform: `scale(${scale})`, transformOrigin: 'center center'}}>
           <div style={{height: pageH, transform: `translateY(${scrollY}px)`}}>
             {blocks.map((b, i) => (
-              <Block key={i} strokes={b.strokes} lines={b.lines} t={t}
+              <Block key={i} strokes={b.strokes} lines={b.lines} t={t} cam={cam}
                 faded={pull > 0 ? 1 : i < pos - 0.6 ? 0.34 : 1} />
             ))}
           </div>
