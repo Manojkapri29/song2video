@@ -1,6 +1,5 @@
 import React from 'react';
 import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
-import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 import {loadFont as loadKalam} from '@remotion/google-fonts/Kalam';
 import {Drawing, Paper, PencilDrawing} from './kit/Pencil';
 import {photosOf, setOf} from './drawings';
@@ -19,9 +18,6 @@ export type SketchProps = {
 
 const BLOCK_H = 820;          // one drawing + its lines
 const PULLBACK = 7;           // seconds at the end that show the whole page
-const SHOT = 1.7;             // the camera reframes this often, so the page never sits still
-const CUT = 0.3;              // seconds the move itself takes
-
 /** deterministic 0..1 per shot number — same shot always frames the same way */
 const rnd = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -31,8 +27,8 @@ const rnd = (n: number) => {
 /** where shot `n` sits: how close in, and how far off centre.
  *  the offset can only use the margin the zoom created, or the picture would crop to blank */
 const shotOf = (n: number) => {
-  const z = 1.12 + rnd(n) * 0.3;
-  const room = (z - 1) * 0.9;
+  const z = 1.1 + rnd(n) * 0.22;
+  const room = (z - 1) * 0.85;
   return {z, x: (rnd(n + 97) - 0.5) * room, y: (rnd(n + 211) - 0.5) * room};
 };
 
@@ -61,8 +57,8 @@ const Handwritten: React.FC<{line: SketchLine; t: number; size: number}> = ({lin
 
 /** A page block: the drawing on the left, the verse written beside it. */
 const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: number;
-  cam: {z: number; x: number; y: number}; photo?: string}> =
-({strokes, lines, t, faded, cam, photo}) => {
+  index: number; live: number; photo?: string}> =
+({strokes, lines, t, faded, index, live, photo}) => {
   const first = lines[0]?.start ?? 0;
   const last = lines[lines.length - 1]?.end ?? first + 1;
   // the picture is drawn across the first half of the verse, so the hand is always ahead of the words
@@ -72,6 +68,18 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const photoIn = interpolate(p, [0.5, 1], [0, 1],
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+
+  // one slow push across the whole verse — a drift, never a cut
+  const from = shotOf(index * 2);
+  const to = shotOf(index * 2 + 1);
+  const k = interpolate(t, [first - 2, Math.max(first, last) + 4], [0, 1],
+    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const glide = k * k * (3 - 2 * k);
+  const cam = {
+    z: 1 + (from.z + (to.z - from.z) * glide - 1) * live,
+    x: (from.x + (to.x - from.x) * glide) * live,
+    y: (from.y + (to.y - from.y) * glide) * live,
+  };
   return (
     <div style={{height: BLOCK_H, display: 'flex', alignItems: 'center', gap: 60,
       padding: '0 120px', opacity: faded}}>
@@ -113,13 +121,6 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const t = frame / fps;
   const total = duration ?? durationInFrames / fps;
 
-  // loudness of the narration right now — the whole frame breathes on it
-  const data = useAudioData(staticFile(audio));
-  const amp = data
-    ? Math.min(1, visualizeAudio({audioData: data, frame, fps, numberOfSamples: 16})
-        .slice(0, 6).reduce((a, b) => a + b, 0) * 2.4)
-    : 0;
-
   const art = setOf(set);
   const pics = photosOf(set);
   const pinned = lines.some((l) => l.block !== undefined);
@@ -154,20 +155,7 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const whole = -(pageH - shown / 2) + height / 2;
   const scrollY = interpolate(pull, [0, 1], [follow, whole]);
 
-  // handheld shot changes: cut to a new framing every SHOT seconds, eased over CUT
-  const n = Math.floor(t / SHOT);
-  const into = interpolate((t % SHOT) / CUT, [0, 1], [0, 1],
-    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const ease = into * into * (3 - 2 * into);
-  const a = shotOf(n - 1);
-  const b = shotOf(n);
   const live = 1 - pull;                            // the pull-back shows the page flat again
-  const cam: {z: number; x: number; y: number} = {
-    z: 1 + (a.z + (b.z - a.z) * ease - 1) * live,
-    x: (a.x + (b.x - a.x) * ease) * live,
-    y: (a.y + (b.y - a.y) * ease) * live,
-  };
-  cam.z *= 1 + amp * 0.08 * live;                   // the picture leans in on the loud words
 
   return (
     <AbsoluteFill>
@@ -176,7 +164,8 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
         <AbsoluteFill style={{transform: `scale(${scale})`, transformOrigin: 'center center'}}>
           <div style={{height: pageH, transform: `translateY(${scrollY}px)`}}>
             {blocks.map((b, i) => (
-              <Block key={i} strokes={b.strokes} lines={b.lines} t={t} cam={cam} photo={b.photo}
+              <Block key={i} strokes={b.strokes} lines={b.lines} t={t} index={i}
+                live={live} photo={b.photo}
                 faded={pull > 0 ? 1 : i < pos - 0.6 ? 0.34 : 1} />
             ))}
           </div>
