@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 import {loadFont as loadKalam} from '@remotion/google-fonts/Kalam';
 import {Drawing, Paper, PencilDrawing} from './kit/Pencil';
 import {setOf} from './drawings';
@@ -18,6 +19,21 @@ export type SketchProps = {
 
 const BLOCK_H = 820;          // one drawing + its lines
 const PULLBACK = 7;           // seconds at the end that show the whole page
+const SHOT = 3.2;             // the camera reframes this often, so the page never sits still
+const CUT = 0.55;             // seconds the move itself takes
+
+/** deterministic 0..1 per shot number — same shot always frames the same way */
+const rnd = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/** where shot `n` sits: how close in, and how far off centre */
+const shotOf = (n: number) => ({
+  z: 1.1 + rnd(n) * 0.26,
+  x: (rnd(n + 97) - 0.5) * 0.3,
+  y: (rnd(n + 211) - 0.5) * 0.18,
+});
 
 const wordsOf = (l: SketchLine): Word[] => {
   if (l.words?.length) return l.words;
@@ -55,16 +71,16 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
   return (
     <div style={{height: BLOCK_H, display: 'flex', alignItems: 'center', gap: 60,
       padding: '0 120px', opacity: faded}}>
-      <div style={{width: 880, height: 610, padding: 18,
+      <div style={{width: 760, height: 610, flexShrink: 0, padding: 18,
         boxShadow: '0 2px 26px rgba(80,62,38,.18)', background: 'rgba(255,252,243,.3)'}}>
         <PencilDrawing strokes={strokes} p={p} faded={faded} />
       </div>
-      <div style={{flex: 1, paddingTop: 40, minHeight: 240}}>
+      <div style={{flex: 1, minWidth: 0, paddingTop: 40, minHeight: 240}}>
         {lines.map((l, i) => {
           // the line holds until the next one starts, so exactly one is on the page
           const until = lines[i + 1]?.start ?? l.end + 3;
           if (t < l.start || t >= until) return null;
-          return <Handwritten key={i} line={l} t={t} size={62} />;
+          return <Handwritten key={i} line={l} t={t} size={56} />;
         })}
       </div>
     </div>
@@ -76,6 +92,13 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const {fps, durationInFrames, height} = useVideoConfig();
   const t = frame / fps;
   const total = duration ?? durationInFrames / fps;
+
+  // loudness of the narration right now — the whole frame breathes on it
+  const data = useAudioData(staticFile(audio));
+  const amp = data
+    ? Math.min(1, visualizeAudio({audioData: data, frame, fps, numberOfSamples: 16})
+        .slice(0, 6).reduce((a, b) => a + b, 0) * 2.4)
+    : 0;
 
   const art = setOf(set);
   const pinned = lines.some((l) => l.block !== undefined);
@@ -109,11 +132,31 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const whole = -(pageH - shown / 2) + height / 2;
   const scrollY = interpolate(pull, [0, 1], [follow, whole]);
 
+  // handheld shot changes: cut to a new framing every SHOT seconds, eased over CUT
+  const n = Math.floor(t / SHOT);
+  const into = interpolate((t % SHOT) / CUT, [0, 1], [0, 1],
+    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const ease = into * into * (3 - 2 * into);
+  const a = shotOf(n - 1);
+  const b = shotOf(n);
+  // while a line is being written the camera stays nearly still, so the words never leave frame;
+  // in the long gaps between lines it is free to move
+  const speaking = lines.some((l) => t >= l.start - 0.4 && t < l.end + 1.2);
+  const live = speaking ? 0 : 1 - pull;
+  const cam = {
+    z: 1 + (a.z + (b.z - a.z) * ease - 1) * live,
+    x: (a.x + (b.x - a.x) * ease) * live,
+    y: (a.y + (b.y - a.y) * ease) * live,
+  };
+  const breathe = 1 + amp * (speaking ? 0.018 : 0.045);
+
   return (
     <AbsoluteFill>
       {audio ? <Audio src={staticFile(audio)} /> : null}
       <Paper>
-        <AbsoluteFill style={{transform: `scale(${scale})`, transformOrigin: 'center center'}}>
+        <AbsoluteFill style={{transform:
+          `translate(${cam.x * 100}%, ${cam.y * 100}%) scale(${scale * cam.z * breathe})`,
+          transformOrigin: 'center center'}}>
           <div style={{height: pageH, transform: `translateY(${scrollY}px)`}}>
             {blocks.map((b, i) => (
               <Block key={i} strokes={b.strokes} lines={b.lines} t={t}
