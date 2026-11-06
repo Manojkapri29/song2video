@@ -26,20 +26,28 @@ export const galaxy: Drawing = [
 
 /** 2. Kakbhushundi — a crow on the bare branch of the wish-tree on Sumeru. */
 export const crow: Drawing = [
-  {d: 'M 14 68 C 22 54 30 44 40 32 C 46 24 52 18 58 14', w: 0.75},
-  {d: 'M 34 40 C 42 38 50 34 56 28', w: 0.5},
-  {d: 'M 44 28 C 52 28 60 25 66 20', w: 0.5},
-  {d: 'M 52 20 C 60 21 68 19 76 15', w: 0.45},
-  {d: 'M 68 24 l 6 -5 M 74 30 l 7 -6 M 58 34 l 6 -5', w: 0.35, o: 0.5},
-  {d: 'M 62 16 q 5 -4 10 -1 q 5 3 3 8 q -2 5 -8 4 q -6 -1 -5 -6 z', w: 0.55},
-  {d: 'M 72 15 l 6 -2 l -5 4', w: 0.5},
-  {d: 'M 64 24 q 6 6 12 2', w: 0.4},
-  {d: 'M 66 27 l -1 4 M 70 27 l 0 4', w: 0.4},
-  {d: 'M 0 62 L 18 46 L 32 62 M 70 62 L 86 42 L 100 62', w: 0.45, o: 0.5},
-  {d: 'M 0 66 L 100 66', w: 0.4, o: 0.4},
-  ...stipple(0, 2, 100, 18, {n: 120, seed: 111, o: 0.24}),
-  ...hatch(0, 44, 100, 22, {n: 70, seed: 112, angle: -60, len: 7, o: 0.2}),
-  ...hatch(56, 10, 28, 20, {n: 36, seed: 113, angle: 20, len: 4, o: 0.16}),
+  // the wish-tree: a real trunk with branches, not one diagonal
+  {d: 'M 30 68 C 31 56 30 46 32 36 C 33 28 34 22 34 16', w: 0.9},
+  {d: 'M 33 34 C 42 32 50 28 58 22', w: 0.6},
+  {d: 'M 32 44 C 24 42 18 38 12 32', w: 0.55},
+  {d: 'M 33 26 C 41 25 48 22 54 17', w: 0.5},
+  {d: 'M 32 54 C 25 53 20 50 15 45', w: 0.45},
+  {d: 'M 46 28 l 5 -5 M 52 25 l 5 -4 M 22 38 l -5 -4 M 26 48 l -5 -3', w: 0.35, o: 0.5},
+  // the crow, large enough to read: body, head, beak, tail, feet on the branch
+  {d: 'M 52 22 q 8 -6 16 -2 q 9 5 6 13 q -3 8 -13 8 q -11 0 -13 -8 q -2 -7 4 -11 z', w: 0.7},
+  {d: 'M 52 20 a 4.6 4.6 0 1 1 0.1 0', w: 0.7},
+  {d: 'M 48 19 l -7 2 l 7 2', w: 0.6},
+  {d: 'M 49.5 18 a 0.7 0.7 0 1 1 0.1 0', w: 0.5},
+  {d: 'M 70 30 l 13 7 l -11 1', w: 0.6},
+  {d: 'M 56 28 q 7 -3 13 2 q -5 6 -12 4', w: 0.5},
+  {d: 'M 58 41 l -1 5 M 64 41 l 1 5', w: 0.5},
+  {d: 'M 55 46 l -4 2 M 55 46 l 0 3 M 66 46 l 4 2 M 66 46 l 0 3', w: 0.45},
+  {d: 'M 44 44 C 54 46 64 46 74 43', w: 0.6},
+  {d: 'M 0 62 L 14 48 L 26 62 M 74 62 L 88 44 L 100 62', w: 0.45, o: 0.5},
+  {d: 'M 0 66 L 100 66', w: 0.45, o: 0.4},
+  ...stipple(0, 2, 100, 16, {n: 120, seed: 111, o: 0.24}),
+  ...hatch(0, 48, 100, 18, {n: 70, seed: 112, angle: -60, len: 7, o: 0.2}),
+  ...hatch(50, 22, 24, 20, {n: 44, seed: 113, angle: 25, len: 4, o: 0.2}),
 ];
 
 /** 3. The river of time, and someone sitting on its bank letting it pass. */
