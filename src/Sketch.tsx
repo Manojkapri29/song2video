@@ -52,11 +52,17 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
   return (
     <div style={{height: BLOCK_H, display: 'flex', alignItems: 'center', gap: 60,
       padding: '0 120px', opacity: faded}}>
-      <div style={{width: 900, height: 620}}>
+      <div style={{width: 880, height: 610, padding: 18,
+        boxShadow: '0 2px 26px rgba(80,62,38,.18)', background: 'rgba(255,252,243,.3)'}}>
         <PencilDrawing strokes={strokes} p={p} faded={faded} />
       </div>
-      <div style={{flex: 1, paddingTop: 40}}>
-        {lines.map((l, i) => <Handwritten key={i} line={l} t={t} size={46} />)}
+      <div style={{flex: 1, paddingTop: 40, minHeight: 240}}>
+        {lines.map((l, i) => {
+          // the line holds until the next one starts, so exactly one is on the page
+          const until = lines[i + 1]?.start ?? l.end + 3;
+          if (t < l.start || t >= until) return null;
+          return <Handwritten key={i} line={l} t={t} size={62} />;
+        })}
       </div>
     </div>
   );
