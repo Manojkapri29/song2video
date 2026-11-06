@@ -1,8 +1,9 @@
 import React from 'react';
 import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont as loadKalam} from '@remotion/google-fonts/Kalam';
+import {useAudioData} from '@remotion/media-utils';
 import {Drawing, Paper, PencilDrawing} from './kit/Pencil';
-import {photosOf, setOf} from './drawings';
+import {photosOf, setOf, tintsOf} from './drawings';
 
 const hand = loadKalam('normal', {weights: ['400', '700'], subsets: ['devanagari', 'latin']}).fontFamily;
 const INK = '#4a4038';
@@ -30,6 +31,17 @@ const shotOf = (n: number) => {
   const z = 1.1 + rnd(n) * 0.22;
   const room = (z - 1) * 0.85;
   return {z, x: (rnd(n + 97) - 0.5) * room, y: (rnd(n + 211) - 0.5) * room};
+};
+
+const hex = (c: string): [number, number, number] =>
+  [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)) as [number, number, number];
+
+/** blend two #rrggbb colours, so the page changes tone as one photograph gives way to the next */
+const mix = (a: string, b: string, k: number) => {
+  const [r1, g1, b1] = hex(a);
+  const [r2, g2, b2] = hex(b);
+  const at = (x: number, y: number) => Math.round(x + (y - x) * k);
+  return `rgb(${at(r1, r2)},${at(g1, g2)},${at(b1, b2)})`;
 };
 
 const wordsOf = (l: SketchLine): Word[] => {
@@ -121,8 +133,25 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const t = frame / fps;
   const total = duration ?? durationInFrames / fps;
 
+  // loudness over a fifth of a second — an envelope, not a per-frame flicker
+  const data = useAudioData(staticFile(audio));
+  let glow = 0;
+  if (data) {
+    const ch = data.channelWaveforms[0];
+    const half = Math.floor(data.sampleRate * 0.22);
+    const c = Math.floor(t * data.sampleRate);
+    let sum = 0;
+    let n = 0;
+    for (let i = Math.max(0, c - half); i < Math.min(ch.length, c + half); i += 64) {
+      sum += ch[i] * ch[i];
+      n++;
+    }
+    glow = n ? Math.min(1, Math.sqrt(sum / n) * 7) : 0;
+  }
+
   const art = setOf(set);
   const pics = photosOf(set);
+  const tints = tintsOf(set);
   const pinned = lines.some((l) => l.block !== undefined);
   const per = Math.ceil(lines.length / art.length);
   const blocks = art.map((strokes, i) => ({
@@ -156,11 +185,15 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
   const scrollY = interpolate(pull, [0, 1], [follow, whole]);
 
   const live = 1 - pull;                            // the pull-back shows the page flat again
+  const tint = tints.length
+    ? mix(tints[Math.min(tints.length - 1, Math.floor(pos))],
+        tints[Math.min(tints.length - 1, Math.floor(pos) + 1)], pos - Math.floor(pos))
+    : undefined;
 
   return (
     <AbsoluteFill>
       {audio ? <Audio src={staticFile(audio)} /> : null}
-      <Paper>
+      <Paper tint={tint} glow={glow}>
         <AbsoluteFill style={{transform: `scale(${scale})`, transformOrigin: 'center center'}}>
           <div style={{height: pageH, transform: `translateY(${scrollY}px)`}}>
             {blocks.map((b, i) => (

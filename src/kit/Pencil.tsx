@@ -77,8 +77,12 @@ export const PencilDrawing: React.FC<{strokes: Drawing; p: number; faded?: numbe
 );
 
 /** Warm sketchbook paper: grain, a soft edge shadow, and the faintest rule. */
-export const Paper: React.FC<{children?: React.ReactNode}> = ({children}) => (
+/** `tint` colours the page after the photograph on it; `glow` (0..1) is the narration's loudness. */
+export const Paper: React.FC<{children?: React.ReactNode; tint?: string; glow?: number}> =
+({children, tint, glow = 0}) => (
   <div style={{position: 'absolute', inset: 0, background: '#e8dcc3', overflow: 'hidden'}}>
+    {tint ? <div style={{position: 'absolute', inset: 0, background: tint,
+      opacity: 0.26 - glow * 0.1}} /> : null}
     <svg style={{position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.5}}>
       <filter id="grain">
         <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" />
@@ -87,7 +91,8 @@ export const Paper: React.FC<{children?: React.ReactNode}> = ({children}) => (
       <rect width="100%" height="100%" filter="url(#grain)" opacity={0.55} />
     </svg>
     <div style={{position: 'absolute', inset: 0,
-      background: 'radial-gradient(ellipse at 42% 40%, rgba(255,252,242,.5) 0%, rgba(120,96,62,.26) 100%)'}} />
+      background: `radial-gradient(ellipse at 42% 40%, rgba(255,252,242,${0.26 + glow * 0.6}) 0%,`
+        + ` rgba(120,96,62,${0.38 - glow * 0.2}) 100%)`}} />
     {children}
     <div style={{position: 'absolute', inset: 0, pointerEvents: 'none',
       boxShadow: 'inset 0 0 150px rgba(86,66,40,.42)'}} />
