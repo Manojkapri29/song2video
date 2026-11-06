@@ -3,7 +3,7 @@ import {AbsoluteFill, Audio, interpolate, staticFile, useCurrentFrame, useVideoC
 import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 import {loadFont as loadKalam} from '@remotion/google-fonts/Kalam';
 import {Drawing, Paper, PencilDrawing} from './kit/Pencil';
-import {setOf} from './drawings';
+import {photosOf, setOf} from './drawings';
 
 const hand = loadKalam('normal', {weights: ['400', '700'], subsets: ['devanagari', 'latin']}).fontFamily;
 const INK = '#4a4038';
@@ -61,7 +61,8 @@ const Handwritten: React.FC<{line: SketchLine; t: number; size: number}> = ({lin
 
 /** A page block: the drawing on the left, the verse written beside it. */
 const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: number;
-  cam: {z: number; x: number; y: number}}> = ({strokes, lines, t, faded, cam}) => {
+  cam: {z: number; x: number; y: number}; photo?: string}> =
+({strokes, lines, t, faded, cam, photo}) => {
   const first = lines[0]?.start ?? 0;
   const last = lines[lines.length - 1]?.end ?? first + 1;
   // the picture is drawn across the first half of the verse, so the hand is always ahead of the words
@@ -69,14 +70,29 @@ const Block: React.FC<{strokes: Drawing; lines: SketchLine[]; t: number; faded: 
   const drawEnd = Math.min(first + 6.5, Math.max(first + 3, last - 0.5));
   const p = interpolate(t, [first - 1.5, drawEnd], [0, 1],
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const photoIn = interpolate(p, [0.5, 1], [0, 1],
+    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   return (
     <div style={{height: BLOCK_H, display: 'flex', alignItems: 'center', gap: 60,
       padding: '0 120px', opacity: faded}}>
       <div style={{width: 760, height: 610, flexShrink: 0, padding: 18, overflow: 'hidden',
         boxShadow: '0 2px 26px rgba(80,62,38,.18)', background: 'rgba(255,252,243,.3)'}}>
-        <div style={{width: '100%', height: '100%',
+        <div style={{position: 'relative', width: '100%', height: '100%',
           transform: `translate(${cam.x * 100}%, ${cam.y * 100}%) scale(${cam.z})`}}>
-          <PencilDrawing strokes={strokes} p={p} faded={faded} />
+          {photo ? (
+            <>
+              {/* the photograph surfaces under the pencil as the drawing finishes */}
+              <img src={staticFile(photo)} alt="" style={{position: 'absolute', inset: 0,
+                width: '100%', height: '100%', objectFit: 'cover', opacity: photoIn * faded,
+                filter: 'sepia(.34) saturate(.78) contrast(1.06) brightness(.94)'}} />
+              <div style={{position: 'absolute', inset: 0, opacity: photoIn * faded,
+                background: 'radial-gradient(ellipse at center, rgba(247,241,226,.10) 40%, rgba(74,64,56,.34) 100%)'}} />
+            </>
+          ) : null}
+          {/* the pencil hands over to the photograph instead of sitting on top of it */}
+          <div style={{position: 'absolute', inset: 0, opacity: 1 - photoIn * 0.88}}>
+            <PencilDrawing strokes={strokes} p={p} faded={faded} />
+          </div>
         </div>
       </div>
       <div style={{flex: 1, minWidth: 0, paddingTop: 40, minHeight: 240}}>
@@ -105,10 +121,12 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
     : 0;
 
   const art = setOf(set);
+  const pics = photosOf(set);
   const pinned = lines.some((l) => l.block !== undefined);
   const per = Math.ceil(lines.length / art.length);
   const blocks = art.map((strokes, i) => ({
     strokes,
+    photo: pics[i],
     lines: pinned ? lines.filter((l) => l.block === i) : lines.slice(i * per, (i + 1) * per),
   })).filter((b) => b.lines.length);
 
@@ -158,7 +176,7 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
         <AbsoluteFill style={{transform: `scale(${scale})`, transformOrigin: 'center center'}}>
           <div style={{height: pageH, transform: `translateY(${scrollY}px)`}}>
             {blocks.map((b, i) => (
-              <Block key={i} strokes={b.strokes} lines={b.lines} t={t} cam={cam}
+              <Block key={i} strokes={b.strokes} lines={b.lines} t={t} cam={cam} photo={b.photo}
                 faded={pull > 0 ? 1 : i < pos - 0.6 ? 0.34 : 1} />
             ))}
           </div>
