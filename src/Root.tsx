@@ -8,6 +8,7 @@ import {Brand, BrandProps} from './presets/Brand';
 import {Explainer, ExplainerProps, explainerDuration, Card} from './presets/Explainer';
 import {SocialPost, SocialProps} from './presets/SocialPost';
 import {Sketch, SketchProps} from './Sketch';
+import {Film} from './Film';
 import {Story, StoryProps, storyFrames} from './presets/Story';
 import {AudioViz, AudioVizProps} from './AudioViz';
 import {KailashFilm, FilmData} from './presets/KailashFilm';
@@ -174,6 +175,14 @@ export const Root = () => (
   <Composition id="Sketch" component={Sketch} width={1920} height={1080} fps={FPS}
     durationInFrames={FPS * 60}
     defaultProps={{lines: [], title: '', handle: '@kathaaurrahasya', audio: '', set: 'pahadi'} as unknown as SketchProps}
+    calculateMetadata={async ({props}) => ({
+      durationInFrames: Math.ceil(((props as SketchProps).duration
+        ?? await getAudioDurationInSeconds(staticFile((props as SketchProps).audio))) * FPS),
+    })} />
+  {/* Cinematic cut of the same material: full-bleed photography and karaoke type. */}
+  <Composition id="Film" component={Film} width={1920} height={1080} fps={FPS}
+    durationInFrames={FPS * 60}
+    defaultProps={{lines: [], title: '', handle: '@kathaaurrahasya', audio: '', set: 'anant'} as unknown as SketchProps}
     calculateMetadata={async ({props}) => ({
       durationInFrames: Math.ceil(((props as SketchProps).duration
         ?? await getAudioDurationInSeconds(staticFile((props as SketchProps).audio))) * FPS),
