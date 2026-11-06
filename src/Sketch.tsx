@@ -19,8 +19,8 @@ export type SketchProps = {
 
 const BLOCK_H = 820;          // one drawing + its lines
 const PULLBACK = 7;           // seconds at the end that show the whole page
-const SHOT = 3.2;             // the camera reframes this often, so the page never sits still
-const CUT = 0.55;             // seconds the move itself takes
+const SHOT = 1.7;             // the camera reframes this often, so the page never sits still
+const CUT = 0.3;              // seconds the move itself takes
 
 /** deterministic 0..1 per shot number — same shot always frames the same way */
 const rnd = (n: number) => {
@@ -149,7 +149,7 @@ export const Sketch: React.FC<SketchProps> = ({lines, title, handle, audio, dura
     x: (a.x + (b.x - a.x) * ease) * live,
     y: (a.y + (b.y - a.y) * ease) * live,
   };
-  cam.z *= 1 + amp * 0.05 * live;                   // the picture leans in on the loud words
+  cam.z *= 1 + amp * 0.08 * live;                   // the picture leans in on the loud words
 
   return (
     <AbsoluteFill>
