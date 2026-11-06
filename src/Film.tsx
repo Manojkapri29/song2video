@@ -7,6 +7,7 @@ import {themeOf} from './kit/theme';
 import {photosOf, tintsOf} from './drawings';
 import {Scene as SceneType} from './kit/Flat2D';
 import {scenesOf} from './scenes2d';
+import {motifIn, Motif} from './motifs';
 import type {SketchLine, SketchProps} from './Sketch';
 
 const BAR = 0.075;        // letterbox height, as a share of the frame
@@ -142,8 +143,26 @@ export const Film: React.FC<SketchProps & {art?: 'photo' | '2d'}> =
 
       {/* the type sits below the picture's light, never inside the grade */}
       <AbsoluteFill style={{background:
-        `linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 26%,`
-        + ` rgba(0,0,0,0) 44%, rgba(0,0,0,.82) 86%)`}} />
+        `linear-gradient(180deg, rgba(0,0,0,.58) 0%, rgba(0,0,0,0) 24%,`
+        + ` rgba(0,0,0,0) 40%, rgba(0,0,0,.62) 72%, rgba(0,0,0,.92) 100%)`}} />
+
+      {/* the thing the line names, assembling itself as the word is spoken */}
+      {lines.map((l, i) => {
+        const ws = wordsOf(l);
+        const hit = motifIn(ws);
+        if (!hit) return null;
+        const until = Math.min(l.end + 2.2, lines[i + 1]?.start ?? l.end + 2.2);
+        const from = Math.round(hit.at * fps);
+        const len = Math.max(fps, Math.round((until - hit.at) * fps));
+        return (
+          <Sequence key={`m${i}`} from={from} durationInFrames={len} layout="none">
+            <div style={{position: 'absolute', right: width * 0.08, top: safe + height * 0.14}}>
+              <Motif name={hit.motif} len={len} size={width * 0.17}
+                color={theme.ink} accent={theme.accent2} />
+            </div>
+          </Sequence>
+        );
+      })}
 
       {lines.map((l, i) => {
         const until = Math.min(l.end + HOLD, lines[i + 1]?.start ?? l.end + HOLD);
