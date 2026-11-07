@@ -18,6 +18,7 @@ import film2027 from '../public/film2027.json';
 import filmMerged from '../public/film_merged.json';
 import kailashStory from '../public/kailash_story.json';
 import kailashPro from '../public/kailash_pro.json';
+import mrityu from '../public/mrityu.json';
 import {Anant} from './presets/Anant';
 import {Moment} from './kit/Moments';
 import anantMoments from '../public/anant_moments.json';
@@ -140,6 +141,12 @@ export const Root = () => (
     defaultProps={{data: {...(kailashPro as FilmData), theme: 'vox'}, audio: 'kailash_vo.mp3'}}
     calculateMetadata={async () => ({
       durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('kailash_vo.mp3'))) * FPS),
+    })} />
+  {/* मृत्यु और आत्मा का रहस्य — painted stills + chapter cards over the original narration. */}
+  <Composition id="Mrityu" component={KailashFilm} width={1920} height={1080} fps={FPS} durationInFrames={FPS * 406}
+    defaultProps={{data: mrityu as FilmData, audio: 'mrityu_vo.mp3'}}
+    calculateMetadata={async () => ({
+      durationInFrames: Math.ceil((await getAudioDurationInSeconds(staticFile('mrityu_vo.mp3'))) * FPS),
     })} />
   <Composition id="Anant" component={Anant} width={1280} height={720} fps={FPS} durationInFrames={15613}
     defaultProps={{moments: anantMoments as Moment[], lines: anantLines}} />
