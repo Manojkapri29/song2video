@@ -9,6 +9,7 @@ import {Explainer, ExplainerProps, explainerDuration, Card} from './presets/Expl
 import {SocialPost, SocialProps} from './presets/SocialPost';
 import {Sketch, SketchProps} from './Sketch';
 import {Film} from './Film';
+import {Reel, ReelProps} from './Reel';
 import {Story, StoryProps, storyFrames} from './presets/Story';
 import {AudioViz, AudioVizProps} from './AudioViz';
 import {KailashFilm, FilmData} from './presets/KailashFilm';
@@ -222,6 +223,13 @@ export const Root = () => (
     durationInFrames={FPS * 60} defaultProps={audiovizProps as unknown as AudioVizProps}
     calculateMetadata={({props}) => ({
       durationInFrames: Math.ceil(((props as AudioVizProps).map?.duration ?? 60) * FPS),
+    })} />
+  {/* Vertical reel: AI-painted stills, moved, with narration and Hindi captions. */}
+  <Composition id="Reel" component={Reel} width={1080} height={1920} fps={FPS}
+    durationInFrames={FPS * 40}
+    defaultProps={{shots: [], lines: [], audio: '', handle: '@kathaaurrahasya', duration: 40} as unknown as ReelProps}
+    calculateMetadata={({props}) => ({
+      durationInFrames: Math.ceil(((props as ReelProps).duration || 40) * FPS),
     })} />
   </>
 );
