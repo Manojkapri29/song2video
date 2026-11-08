@@ -23,6 +23,10 @@ import {Anant} from './presets/Anant';
 import {Moment} from './kit/Moments';
 import anantMoments from '../public/anant_moments.json';
 import anantLines from '../public/anant_lines.json';
+import {QuizShort, QuizProps, quizFrames} from './presets/QuizShort';
+import quiz01 from '../public/quiz/01_chalisa.json';
+import quiz02 from '../public/quiz/02_kedarnath.json';
+import quiz03 from '../public/quiz/03_golu.json';
 import {Storybook, StorybookProps} from './presets/Storybook';
 import pahadiStory from '../public/pahadi.story.json';
 import {Garuda, GProps} from './Garuda';
@@ -205,6 +209,18 @@ export const Root = () => (
     calculateMetadata={({props}) => ({
       durationInFrames: Math.ceil(((props as AudioVizProps).map?.duration ?? 60) * FPS),
     })} />
+  {/* Engagement Shorts: one easy question, a countdown, a reveal. One composition per reel so
+      each can be rendered and posted on its own day. */}
+  {[['Quiz1', quiz01], ['Quiz2', quiz02], ['Quiz3', quiz03]].map(([id, data]) => (
+    <Composition key={id as string} id={id as string} component={QuizShort}
+      width={1080} height={1920} fps={FPS}
+      durationInFrames={quizFrames((data as unknown as QuizProps).beats, FPS)}
+      defaultProps={data as unknown as QuizProps}
+      calculateMetadata={({props}) => ({
+        durationInFrames: quizFrames((props as QuizProps).beats, FPS),
+      })} />
+  ))}
+
   {/* Vector storybook for a song: pages turn on beats from tools/audiomap.py. */}
   <Composition id="Storybook" component={Storybook} width={1920} height={1080} fps={FPS}
     durationInFrames={FPS * 180}
